@@ -1,0 +1,322 @@
+[
+ {
+  "rank": 1,
+  "player": "LeBron James"
+ },
+ {
+  "rank": 2,
+  "player": "Michael Jordan"
+ },
+ {
+  "rank": 3,
+  "player": "Kareem Abdul-Jabbar"
+ },
+ {
+  "rank": 4,
+  "player": "Magic Johnson"
+ },
+ {
+  "rank": 5,
+  "player": "Bill Russell"
+ },
+ {
+  "rank": 6,
+  "player": "Wilt Chamberlain"
+ },
+ {
+  "rank": 7,
+  "player": "Larry Bird"
+ },
+ {
+  "rank": 8,
+  "player": "Kobe Bryant"
+ },
+ {
+  "rank": 9,
+  "player": "Shaquille O'Neal"
+ },
+ {
+  "rank": 10,
+  "player": "Tim Duncan"
+ },
+ {
+  "rank": 11,
+  "player": "Hakeem Olajuwon"
+ },
+ {
+  "rank": 12,
+  "player": "Kevin Durant"
+ },
+ {
+  "rank": 13,
+  "player": "Stephen Curry"
+ },
+ {
+  "rank": 14,
+  "player": "Oscar Robertson"
+ },
+ {
+  "rank": 15,
+  "player": "Karl Malone"
+ },
+ {
+  "rank": 16,
+  "player": "Moses Malone"
+ },
+ {
+  "rank": 17,
+  "player": "Kevin Garnett"
+ },
+ {
+  "rank": 18,
+  "player": "Jerry West"
+ },
+ {
+  "rank": 19,
+  "player": "Dirk Nowitzki"
+ },
+ {
+  "rank": 20,
+  "player": "Giannis Antetokounmpo"
+ },
+ {
+  "rank": 21,
+  "player": "Julius Erving"
+ },
+ {
+  "rank": 22,
+  "player": "Elgin Baylor"
+ },
+ {
+  "rank": 23,
+  "player": "Nikola Jokic"
+ },
+ {
+  "rank": 24,
+  "player": "Dwyane Wade"
+ },
+ {
+  "rank": 25,
+  "player": "David Robinson"
+ },
+ {
+  "rank": 26,
+  "player": "Charles Barkley"
+ },
+ {
+  "rank": 27,
+  "player": "Isiah Thomas"
+ },
+ {
+  "rank": 28,
+  "player": "Scottie Pippen"
+ },
+ {
+  "rank": 29,
+  "player": "Chris Paul"
+ },
+ {
+  "rank": 30,
+  "player": "John Havlicek"
+ },
+ {
+  "rank": 31,
+  "player": "Allen Iverson"
+ },
+ {
+  "rank": 32,
+  "player": "James Harden"
+ },
+ {
+  "rank": 33,
+  "player": "Bob Pettit"
+ },
+ {
+  "rank": 34,
+  "player": "Kawhi Leonard"
+ },
+ {
+  "rank": 35,
+  "player": "John Stockton"
+ },
+ {
+  "rank": 36,
+  "player": "Steve Nash"
+ },
+ {
+  "rank": 37,
+  "player": "Patrick Ewing"
+ },
+ {
+  "rank": 38,
+  "player": "Rick Barry"
+ },
+ {
+  "rank": 39,
+  "player": "Bob Cousy"
+ },
+ {
+  "rank": 40,
+  "player": "Jason Kidd"
+ },
+ {
+  "rank": 41,
+  "player": "Elvin Hayes"
+ },
+ {
+  "rank": 42,
+  "player": "Gary Payton"
+ },
+ {
+  "rank": 43,
+  "player": "George Gervin"
+ },
+ {
+  "rank": 44,
+  "player": "Anthony Davis"
+ },
+ {
+  "rank": 45,
+  "player": "Dominique Wilkins"
+ },
+ {
+  "rank": 46,
+  "player": "Clyde Drexler"
+ },
+ {
+  "rank": 47,
+  "player": "George Mikan"
+ },
+ {
+  "rank": 48,
+  "player": "Russell Westbrook"
+ },
+ {
+  "rank": 49,
+  "player": "James Worthy"
+ },
+ {
+  "rank": 50,
+  "player": "Carmelo Anthony"
+ },
+ {
+  "rank": 51,
+  "player": "Paul Pierce"
+ },
+ {
+  "rank": 52,
+  "player": "Damian Lillard"
+ },
+ {
+  "rank": 53,
+  "player": "Bob McAdoo"
+ },
+ {
+  "rank": 54,
+  "player": "Reggie Miller"
+ },
+ {
+  "rank": 55,
+  "player": "Ray Allen"
+ },
+ {
+  "rank": 56,
+  "player": "Kevin McHale"
+ },
+ {
+  "rank": 57,
+  "player": "Wes Unseld"
+ },
+ {
+  "rank": 58,
+  "player": "Pau Gasol"
+ },
+ {
+  "rank": 59,
+  "player": "Walt Frazier"
+ },
+ {
+  "rank": 60,
+  "player": "Robert Parish"
+ },
+ {
+  "rank": 61,
+  "player": "Willis Reed"
+ },
+ {
+  "rank": 62,
+  "player": "Dwight Howard"
+ },
+ {
+  "rank": 63,
+  "player": "Dolph Schayes"
+ },
+ {
+  "rank": 64,
+  "player": "Shai Gilgeous-Alexander"
+ },
+ {
+  "rank": 65,
+  "player": "Chris Bosh"
+ },
+ {
+  "rank": 66,
+  "player": "Nate Archibald"
+ },
+ {
+  "rank": 67,
+  "player": "Dennis Rodman"
+ },
+ {
+  "rank": 68,
+  "player": "Pete Maravich"
+ },
+ {
+  "rank": 69,
+  "player": "Dave Cowens"
+ },
+ {
+  "rank": 70,
+  "player": "Tony Parker"
+ },
+ {
+  "rank": 71,
+  "player": "Luka Doncic"
+ },
+ {
+  "rank": 72,
+  "player": "Kyrie Irving"
+ },
+ {
+  "rank": 73,
+  "player": "Vince Carter"
+ },
+ {
+  "rank": 74,
+  "player": "Earl Monroe"
+ },
+ {
+  "rank": 75,
+  "player": "Paul Arizin"
+ },
+ {
+  "rank": 76,
+  "player": "Bernard King"
+ },
+ {
+  "rank": 77,
+  "player": "Joel Embiid"
+ },
+ {
+  "rank": 78,
+  "player": "Alex English"
+ },
+ {
+  "rank": 79,
+  "player": "Tracy McGrady"
+ },
+ {
+  "rank": 80,
+  "player": "Hal Greer"
+ }
+]

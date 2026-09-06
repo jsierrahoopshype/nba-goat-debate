@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GOAT Machine: build your own NBA Top 25 | HoopsMatic</title>
+<meta name="description" content="Set 17 sliders for what greatness means to you and get your personal NBA GOAT Top 25, compared against the HoopsHype 80 and what actual NBA players say.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#f5f5f7;
+  --surface:#fff;
+  --surface-hover:#f0f0f2;
+  --border:#d1d1d6;
+  --hair:#e8e8ea;
+  --text:#1d1d1f;
+  --text-secondary:#6e6e73;
+  --accent:#3b82f6;
+  --accent-dim:rgba(59,130,246,.12);
+  --up:#16a34a;
+  --down:#dc2626;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+html{font-size:100%}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--page);color:var(--text);line-height:1.5;font-size:15px;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+a{color:inherit}
+main{max-width:1140px;margin:0 auto;padding:26px 20px 40px}
+.hero h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-bottom:8px}
+.hero p{color:var(--text-secondary);max-width:70ch;margin-bottom:18px;font-size:14px}
+.back{
+  display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;
+  font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--text-secondary);text-decoration:none;
+}
+.back:hover{color:var(--text)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.section-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}
+
+/* ---- sliders ---- */
+.machine{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){.machine{grid-template-columns:1fr}}
+.panel{padding:16px;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow-y:auto}
+@media(max-width:900px){.panel{position:static;max-height:none}}
+.grp{margin-bottom:14px}
+.grp + .grp{border-top:1px solid var(--hair);padding-top:12px}
+.grp-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.sl{margin-bottom:10px}
+.sl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+.sl-name{font-size:13px;font-weight:600}
+.sl-val{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text-secondary);min-width:26px;text-align:right}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;cursor:pointer;display:block;
+}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(to right,var(--accent) 0%,var(--accent) var(--pct,50%),var(--hair) var(--pct,50%),var(--hair) 100%)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;
+  background:#fff;border:2px solid var(--accent);margin-top:-8px;box-shadow:0 1px 3px rgba(0,0,0,.18);
+}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--hair)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.zero-msg{
+  font-family:var(--mono);font-size:11px;color:var(--down);font-weight:600;
+  margin-top:6px;opacity:0;transition:opacity .25s;
+}
+.zero-msg.show{opacity:1}
+.panel-btns{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+.btn{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;color:var(--text);
+}
+.btn:hover{background:var(--surface-hover)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{opacity:.9}
+
+/* ---- top 25 grid ---- */
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr);gap:8px}}
+.pcard{padding:10px 8px 12px;text-align:center;position:relative;overflow:hidden}
+.pcard.first{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim);}
+.pcard .rk{
+  position:absolute;top:7px;left:9px;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text-secondary);
+}
+.pcard.first .rk{color:var(--accent)}
+.chips{position:absolute;top:6px;right:7px;display:flex;flex-direction:column;gap:3px;align-items:flex-end}
+.pcard .delta{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  padding:2px 5px;border-radius:10px;background:var(--surface-hover);color:var(--text-secondary);
+}
+.pcard .delta.up{color:var(--up);background:rgba(22,163,74,.1)}
+.pcard .delta.down{color:var(--down);background:rgba(220,38,38,.08)}
+/* Some face2 crops carry a flat dark padding band across the bottom. The
+   image is drawn 1.2x the circle and anchored to its top, so that band (and
+   jersey edges) falls outside the clip - same trick as the comparison video
+   generator's FACE_OVERSCAN. */
+.headshot-wrap{
+  width:72px;height:72px;border-radius:50%;overflow:hidden;background:var(--surface-hover);
+  margin:14px auto 6px;border:1px solid var(--hair);
+}
+.headshot-wrap img{width:120%;height:120%;max-width:none;margin-left:-10%;display:block}
+.pcard.first .headshot-wrap{width:86px;height:86px}
+.no-img{
+  width:72px;height:72px;border-radius:50%;background:var(--accent-dim);color:var(--accent);
+  margin:14px auto 6px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;font-size:20px;
+}
+.pcard .nm{font-size:12.5px;font-weight:600;line-height:1.25;min-height:2.5em;display:flex;align-items:center;justify-content:center}
+.pcard .sc{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text-secondary);margin-top:2px}
+.pcard.first .sc{color:var(--accent);font-size:15px}
+
+/* ---- result cards ---- */
+.result-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:760px){.result-cards{grid-template-columns:1fr}}
+.rc{padding:16px}
+.rc h3{font-family:var(--mono);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);margin-bottom:10px}
+.adjective{
+  font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--accent);margin-bottom:4px;line-height:1.2;
+}
+.adjective-sub{font-size:13px;color:var(--text-secondary);margin-bottom:12px}
+.wlist{display:flex;flex-direction:column;gap:5px}
+.wrow{display:flex;justify-content:space-between;font-size:13px;padding:5px 8px;border-radius:6px;background:var(--page)}
+.wrow b{font-weight:600}
+.wrow .v{font-family:var(--mono);font-weight:600;color:var(--text-secondary)}
+.wlbl{font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);margin:8px 0 4px}
+.consensus-line{font-size:14px;margin-bottom:10px}
+.consensus-line b{color:var(--accent)}
+.lead-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 8px;border-radius:6px}
+.lead-row:nth-child(odd){background:var(--page)}
+.lead-row .v{font-family:var(--mono);font-weight:600}
+.movers{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.mover{flex:1;min-width:140px;padding:9px 10px;border-radius:8px;background:var(--page);font-size:13px}
+.mover .tag{font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:2px}
+.mover.up .tag{color:var(--up)}
+.mover.down .tag{color:var(--down)}
+.share-note{font-family:var(--mono);font-size:11px;color:var(--text-secondary);margin-top:8px;min-height:16px}
+
+/* ---- share card modal (Trade Card / comparison card style) ---- */
+#cardmodal{
+  position:fixed;inset:0;background:rgba(8,7,15,.78);z-index:50;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px;
+}
+#cardmodal .stage{
+  width:min(92vw, 440px);aspect-ratio:1080/1350;border-radius:14px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.55);background:#0d0a22;
+}
+#cardmodal canvas{width:100%;height:100%;display:block}
+#cardmodal .cardbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#cardmodal .cbtn{
+  font-family:'Poppins',Arial,sans-serif;font-weight:600;font-size:14px;padding:11px 24px;
+  border-radius:999px;border:none;cursor:pointer;color:#fff;letter-spacing:.02em;
+}
+#cardmodal .cbtn.dl{background:linear-gradient(135deg,#8B7CFF,#FF5CA8)}
+#cardmodal .cbtn.cp{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.25)}
+#cardmodal .cbtn.cl{background:transparent;border:1.5px solid rgba(255,255,255,.25);color:#a29dcf}
+#cardmodal .cstatus{font-family:'Poppins',Arial,sans-serif;font-size:12px;color:#a29dcf;min-height:16px;text-align:center}
+footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--hair);font-size:12px;color:var(--text-secondary)}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" id="backlink" href="./">&larr; The GOAT Debate</a>
+  <div class="hero">
+    <h1>GOAT Machine</h1>
+    <p>Decide what greatness actually means. Set how much stock you put in each of the 17 aspects below and get your personal Top 25 of all time, built from the HoopsHype 80 pool. Then see how your list stacks up against the official ranking, and against what actual NBA players say.</p>
+  </div>
+
+  <div class="machine">
+    <div class="card panel" id="panel">
+      <div id="sliders"></div>
+      <div class="zero-msg" id="zeromsg">you have to care about something</div>
+      <div class="panel-btns">
+        <button class="btn primary" id="sharebtn">Copy link to my list</button>
+        <button class="btn" id="cardbtn">Share card</button>
+        <button class="btn" id="resetbtn">Reset</button>
+      </div>
+      <div class="share-note" id="sharenote"></div>
+    </div>
+
+    <div>
+      <div class="grid" id="grid"></div>
+      <div class="result-cards">
+        <div class="card rc">
+          <h3>Your profile</h3>
+          <div class="adjective" id="adjective"></div>
+          <div class="adjective-sub" id="adjsub"></div>
+          <div class="wlbl">What you care about most</div>
+          <div class="wlist" id="topw"></div>
+          <div class="wlbl">What you care about least</div>
+          <div class="wlist" id="loww"></div>
+        </div>
+        <div class="card rc">
+          <h3>You vs everyone else</h3>
+          <div class="consensus-line" id="agree"></div>
+          <div class="wlbl">What NBA players say (stated GOAT picks)</div>
+          <div id="leaderboard"></div>
+          <div class="wlbl" id="crowdlbl" hidden>What the crowd says</div>
+          <div id="crowdlist"></div>
+          <div class="movers">
+            <div class="mover up"><span class="tag" id="risertag">Your biggest riser</span><span id="riser"></span></div>
+            <div class="mover down"><span class="tag" id="fallertag">Your biggest faller</span><span id="faller"></span></div>
+          </div>
+        </div>
+      </div>
+      <footer>Pool: the 80 players of the HoopsHype 80 (July 2026). Scores precomputed from HoopsHype lists, the All-Time Database, and stated GOAT picks by NBA players. A HoopsMatic tool.</footer>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ================= GOAT Machine =================
+   Loads data/goat-machine-scores.json (17 category scores 0-100 per
+   player, pool leader = 100) and does only weight math client-side:
+   playerScore = sum(weight_i * score_i), displayed / 100. */
+
+/* NOTE: this array's order also defines the ?w= share-URL encoding order. */
+var CATS = [
+  {key:"careerAverages",   label:"Career averages",        grp:"Performance"},
+  {key:"accumulatedStats", label:"Accumulated stats",      grp:"Performance"},
+  {key:"efficiency",       label:"Efficiency",             grp:"Performance"},
+  {key:"peak",             label:"Peak",                   grp:"Performance"},
+  {key:"defense",          label:"Defense",                grp:"Performance"},
+  {key:"playoffPerformance",label:"Playoff performance",   grp:"Performance"},
+  {key:"finalsPerformance",label:"Finals performance",     grp:"Performance"},
+  {key:"accolades",        label:"Accolades",              grp:"Résumé"},
+  {key:"longevity",        label:"Sustained excellence",   grp:"Résumé"},
+  {key:"durability",       label:"Durability",             grp:"Résumé"},
+  {key:"eraDifficulty",    label:"Era difficulty",         grp:"Legacy"},
+  {key:"loyalty",          label:"Loyalty",                grp:"Legacy"},
+  {key:"peersRespect",     label:"Respect from peers",     grp:"Legacy"},
+  {key:"offCourtImpact",   label:"Off-court impact",       grp:"Legacy"},
+  {key:"teamSuccess",      label:"Team success in the NBA",grp:"Winning"},
+  {key:"fibaSuccess",      label:"FIBA success",           grp:"Winning"},
+  {key:"abaCredit",        label:"ABA credit",             grp:"Winning"}
+];
+
+var DATA_URLS = [
+  "data/goat-machine-scores.json",
+  "https://jsierrahoopshype.github.io/nba-goat-debate/data/goat-machine-scores.json"
+];
+
+/* Crowd consensus: average rank across every visitor-submitted list.
+   Served by the hoopsmatic-goat-consensus Worker; the page degrades
+   gracefully (no crowd chips) when it is unreachable or has few lists. */
+var CONSENSUS_API = "https://hoopsmatic-goat-consensus.thejorgesierra.workers.dev";
+var CROWD_MIN_LISTS = 5;
+var crowd = null;   /* {count, rank:{hh80Rank: crowdPosition}} */
+
+var DATA = null;
+var weights = {};
+var DEFAULTS = {};
+CATS.forEach(function(c){ DEFAULTS[c.key] = c.key === "abaCredit" ? 50 : 0; });
+CATS.forEach(function(c){ weights[c.key] = DEFAULTS[c.key]; });
+
+/* ---- URL weights (?w=50-50-...-50 in CATS order) ---- */
+(function(){
+  var m = location.search.match(/[?&]w=([\d-]+)/);
+  if(!m) return;
+  var parts = m[1].split("-").map(Number);
+  if(parts.length !== CATS.length) return;
+  var ok = parts.every(function(v){ return v >= 0 && v <= 100 && !isNaN(v); });
+  if(!ok) return;
+  CATS.forEach(function(c,i){ weights[c.key] = parts[i]; });
+  document.title = "My GOAT Top 25 | GOAT Machine";
+})();
+
+/* ---- load data ---- */
+function loadData(i){
+  i = i || 0;
+  fetch(DATA_URLS[i]).then(function(r){
+    if(!r.ok) throw new Error(r.status);
+    return r.json();
+  }).then(function(d){
+    DATA = d;
+    buildSliders();
+    recompute();
+  }).catch(function(){
+    if(i + 1 < DATA_URLS.length) loadData(i + 1);
+    else document.getElementById("grid").innerHTML =
+      '<div class="card" style="grid-column:1/-1;padding:20px">Could not load the scores data. Try a hard refresh.</div>';
+  });
+}
+loadData();
+loadCrowd();
+
+function loadCrowd(){
+  fetch(CONSENSUS_API + "/summary").then(function(r){ return r.json(); }).then(function(d){
+    if(!d || d.count < CROWD_MIN_LISTS) return;
+    /* avg rank -> crowd position 1..80 */
+    var entries = Object.keys(d.avg).map(function(k){ return {hh: +k, avg: d.avg[k]}; });
+    entries.sort(function(a,b){ return a.avg - b.avg || a.hh - b.hh; });
+    var rank = {};
+    entries.forEach(function(e,i){ rank[e.hh] = i + 1; });
+    crowd = {count: d.count, rank: rank};
+    if(DATA) recompute();
+  }).catch(function(){ /* consensus is optional */ });
+}
+
+/* submit this visitor's full 80-player order once per day, silently */
+function submitToCrowd(rows){
+  try {
+    var today = new Date().toISOString().slice(0,10);
+    if(localStorage.getItem("goatMachineSubmitted") === today) return;
+    var order = rows.map(function(r){ return r.p.hh80Rank; });
+    fetch(CONSENSUS_API + "/submit", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({order: order})
+    }).then(function(r){
+      if(r.ok) localStorage.setItem("goatMachineSubmitted", today);
+    }).catch(function(){});
+  } catch(e){ /* storage blocked - skip */ }
+}
+
+/* ---- sliders ---- */
+function buildSliders(){
+  var host = document.getElementById("sliders");
+  var html = "", lastGrp = "";
+  CATS.forEach(function(c){
+    if(c.grp !== lastGrp){
+      if(lastGrp) html += "</div>";
+      html += '<div class="grp"><div class="grp-title">' + c.grp + "</div>";
+      lastGrp = c.grp;
+    }
+    html += '<div class="sl">' +
+      '<div class="sl-head"><span class="sl-name">' + c.label + '</span>' +
+      '<span class="sl-val" id="val-' + c.key + '">' + weights[c.key] + "</span></div>" +
+      '<input type="range" min="0" max="100" step="1" value="' + weights[c.key] + '" data-key="' + c.key + '" aria-label="' + c.label + '">' +
+      "</div>";
+  });
+  html += "</div>";
+  host.innerHTML = html;
+  host.querySelectorAll("input[type=range]").forEach(function(inp){
+    paintTrack(inp);
+    /* during a drag only the number next to the slider moves; the list and
+       the card scores update on release, so they don't flicker mid-drag */
+    inp.addEventListener("input", function(){
+      weights[inp.dataset.key] = +inp.value;
+      document.getElementById("val-" + inp.dataset.key).textContent = inp.value;
+      paintTrack(inp);
+    });
+    inp.addEventListener("change", function(){
+      userTouched = true;
+      guardAllZero(inp);
+      recompute();
+    });
+  });
+  document.getElementById("resetbtn").addEventListener("click", function(){
+    CATS.forEach(function(c){ setWeight(c.key, DEFAULTS[c.key]); });
+    history.replaceState(null, "", location.pathname);
+    document.title = "GOAT Machine: build your own NBA Top 25 | HoopsMatic";
+    recompute();
+  });
+  document.getElementById("sharebtn").addEventListener("click", shareLink);
+  document.getElementById("cardbtn").addEventListener("click", openShareCard);
+}
+function paintTrack(inp){ inp.style.setProperty("--pct", inp.value + "%"); }
+function setWeight(key, v){
+  weights[key] = v;
+  var inp = document.querySelector('input[data-key="' + key + '"]');
+  inp.value = v; paintTrack(inp);
+  document.getElementById("val-" + key).textContent = v;
+}
+/* Nobody ranks 80 players by nothing: keep the last-zeroed slider at 1 */
+function guardAllZero(lastTouched){
+  var total = CATS.reduce(function(s,c){ return s + weights[c.key]; }, 0);
+  if(total === 0){
+    setWeight(lastTouched.dataset.key, 1);
+    var msg = document.getElementById("zeromsg");
+    msg.classList.add("show");
+    clearTimeout(msg._t);
+    msg._t = setTimeout(function(){ msg.classList.remove("show"); }, 2200);
+    recompute();
+  }
+}
+
+/* ---- scoring ---- */
+function ranked(){
+  var rows = DATA.players.map(function(p){
+    var s = 0;
+    CATS.forEach(function(c){ s += weights[c.key] * p.scores[c.key]; });
+    return {p:p, score:s};
+  });
+  rows.sort(function(a,b){
+    if(b.score !== a.score) return b.score - a.score;
+    return a.p.hh80Rank - b.p.hh80Rank;   /* ties broken by HH80 rank */
+  });
+  rows.forEach(function(r,i){ r.rank = i + 1; });
+  return rows;
+}
+function fmtScore(s){ return Math.round(s / 100).toLocaleString("en-US"); }
+
+var userTouched = /[?&]w=/.test(location.search);
+var submitTimer = null;
+function recompute(){
+  if(!DATA) return;
+  var rows = ranked();
+  renderGrid(rows.slice(0,25));
+  renderProfile();
+  renderConsensus(rows);
+  if(userTouched){
+    clearTimeout(submitTimer);
+    submitTimer = setTimeout(function(){ submitToCrowd(ranked()); }, 4000);
+  }
+}
+
+/* ---- Top 25 grid ---- */
+function initials(name){
+  return name.split(" ").map(function(w){ return w[0]; }).slice(0,2).join("");
+}
+function headshotUrl(p){
+  return p.headshot ? DATA.headshotBase + "face2-160/" + p.headshot + ".webp" : null;
+}
+function pngFallback(url){
+  return url.replace("/face2-160/", "/face2/").replace(".webp", ".png");
+}
+function deltaChip(refRank, userRank, label){
+  var d = refRank - userRank;
+  var cls = d > 0 ? "delta up" : d < 0 ? "delta down" : "delta";
+  var arrow = d > 0 ? "▲" + d : d < 0 ? "▼" + (-d) : "—";
+  return '<span class="' + cls + '" title="' + label + ' rank: ' + refRank + '">' +
+         label + " " + arrow + "</span>";
+}
+function renderGrid(top){
+  var html = top.map(function(r){
+    var p = r.p;
+    var chip = '<span class="chips">' + deltaChip(p.hh80Rank, r.rank, "HH") +
+      (crowd && crowd.rank[p.hh80Rank] ? deltaChip(crowd.rank[p.hh80Rank], r.rank, "Fans") : "") +
+      "</span>";
+    var url = headshotUrl(p);
+    var img = url
+      ? '<div class="headshot-wrap"><img loading="lazy" src="' + url + '" alt="' + p.name + '" ' +
+        'onerror="imgFallback(this)" data-step="0"></div>'
+      : '<div class="no-img">' + initials(p.name) + "</div>";
+    return '<div class="card pcard' + (r.rank === 1 ? " first" : "") + '">' +
+      '<span class="rk">' + r.rank + "</span>" + chip + img +
+      '<div class="nm">' + p.name + '</div>' +
+      '<div class="sc">' + fmtScore(r.score) + "</div></div>";
+  }).join("");
+  document.getElementById("grid").innerHTML = html;
+}
+/* webp 160 first, full-size face2 png on error, initials as last resort */
+function imgFallback(img){
+  if(img.dataset.step === "0"){
+    img.dataset.step = "1";
+    img.src = pngFallback(img.src);
+  } else {
+    var div = document.createElement("div");
+    div.className = "no-img";
+    div.textContent = initials(img.alt);
+    (img.closest(".headshot-wrap") || img).replaceWith(div);
+  }
+}
+
+/* ---- profile card + adjective ---- */
+function renderProfile(){
+  var byW = CATS.slice().sort(function(a,b){ return weights[b.key] - weights[a.key]; });
+  var row = function(c){
+    return '<div class="wrow"><b>' + c.label + '</b><span class="v">' + weights[c.key] + "</span></div>";
+  };
+  document.getElementById("topw").innerHTML = byW.slice(0,3).map(row).join("");
+  document.getElementById("loww").innerHTML = byW.slice(-3).reverse().map(row).join("");
+  var adj = adjective();
+  document.getElementById("adjective").textContent = adj.label;
+  document.getElementById("adjsub").textContent = adj.sub;
+}
+
+var SINGLE = {
+  teamSuccess:"Ring Counter", playoffPerformance:"Big Game Hunter", finalsPerformance:"June Guy",
+  careerAverages:"Box Score Truther", accumulatedStats:"Proud Compiler", efficiency:"Efficiency Cop",
+  peak:"Prime Purist", longevity:"Longevity Truther", loyalty:"One-Jersey Romantic",
+  defense:"Defense First", durability:"Iron Man Voter", accolades:"Hardware Guy",
+  eraDifficulty:"Era Adjuster", peersRespect:"Locker Room Pollster", offCourtImpact:"Sneakerhead",
+  fibaSuccess:"FIBA Sicko", abaCredit:"Red White and Blue Baller"
+};
+
+function adjective(){
+  var w = weights;
+  var vals = CATS.map(function(c){ return w[c.key]; });
+  var avg = vals.reduce(function(a,b){ return a + b; }, 0) / vals.length;
+  var dev = {};
+  CATS.forEach(function(c){ dev[c.key] = w[c.key] - avg; });
+  var HI = 15, LO = -15;
+  var hi = function(k){ return dev[k] >= HI; };
+  var lo = function(k){ return dev[k] <= LO; };
+  var statCats = ["careerAverages","accumulatedStats","efficiency"];
+  var statsLow = statCats.every(lo);
+
+  /* combo rules, top to bottom - first match wins */
+  if(hi("teamSuccess") && hi("finalsPerformance") && statsLow) return out("Scoreboard Watcher");
+  if(hi("careerAverages") && hi("accumulatedStats") && hi("efficiency") && lo("teamSuccess") && lo("finalsPerformance")) return out("Numbers Never Lie");
+  if(hi("accolades") && hi("eraDifficulty") && lo("efficiency") && lo("careerAverages")) return out("Old Head");
+  if(hi("efficiency") && hi("peak") && lo("eraDifficulty")) return out("Recency Merchant");
+  if(hi("offCourtImpact") && hi("peersRespect") && statsLow) return out("Vibes Historian");
+  if(hi("peak") && hi("finalsPerformance") && lo("longevity")) return out("Debate Show Caller");
+  if(hi("efficiency") && hi("defense") && hi("eraDifficulty")) return out("Front Office Brain");
+  if(hi("loyalty") && hi("eraDifficulty") && hi("defense")) return out("The Purist");
+  if(hi("fibaSuccess") && hi("offCourtImpact")) return out("The Globalist");
+  if(hi("accolades") && hi("longevity")) return out("First Ballot Voter");
+  if(hi("durability") && hi("longevity")) return out("Attendance Taker");
+  var maxed = CATS.filter(function(c){ return w[c.key] === 100; });
+  if(maxed.length === 1 && CATS.every(function(c){ return c.key === maxed[0].key || w[c.key] < 25; }))
+    return out("One-Issue Voter");
+
+  /* single category: highest deviation, if anything deviates meaningfully */
+  var top = CATS.slice().sort(function(a,b){ return dev[b.key] - dev[a.key]; })[0];
+  if(dev[top.key] >= HI) return out(SINGLE[top.key]);
+
+  /* flat profiles */
+  if(vals.every(function(v){ return v >= 70; })) return out("Maximalist");
+  if(vals.every(function(v){ return v <= 30; })) return out("Hater");
+  return out("The Centrist");
+
+  function out(label){
+    return {label: label, sub: "That's the kind of GOAT voter you are."};
+  }
+}
+
+/* ---- consensus card ---- */
+function renderConsensus(rows){
+  var no1 = rows[0].p;
+  var agree = no1.pickSharePct;
+  document.getElementById("agree").innerHTML =
+    "Your GOAT is <b>" + no1.name + "</b>. " +
+    (agree > 0
+      ? agree + "% of NBA players with a stated pick agree."
+      : "No NBA player with a stated pick agrees. Bold.");
+  var leaders = DATA.players.filter(function(p){ return p.pickSharePct > 0; })
+    .sort(function(a,b){ return b.pickSharePct - a.pickSharePct; }).slice(0,6);
+  document.getElementById("leaderboard").innerHTML = leaders.map(function(p){
+    return '<div class="lead-row"><span>' + p.name + '</span><span class="v">' + p.pickSharePct + "%</span></div>";
+  }).join("");
+  /* the crowd's own Top 5, once enough lists are in */
+  var byName = {};
+  DATA.players.forEach(function(p){ byName[p.hh80Rank] = p; });
+  if(crowd){
+    var order = Object.keys(crowd.rank).sort(function(a,b){ return crowd.rank[a] - crowd.rank[b]; });
+    var lbl = document.getElementById("crowdlbl");
+    lbl.hidden = false;
+    lbl.textContent = "What the crowd's lists say (" + crowd.count.toLocaleString("en-US") + " lists)";
+    document.getElementById("crowdlist").innerHTML = order.slice(0,5).map(function(hh,i){
+      var userRow = rows.filter(function(r){ return r.p.hh80Rank === +hh; })[0];
+      return '<div class="lead-row"><span>' + (i+1) + ". " + byName[hh].name +
+             '</span><span class="v">you: ' + (userRow ? userRow.rank : "-") + "</span></div>";
+    }).join("");
+  }
+  /* biggest mover within the user's Top 25 - vs the crowd when we have it,
+     vs the official HoopsHype 80 otherwise */
+  var refRank = crowd
+    ? function(p){ return crowd.rank[p.hh80Rank] || 80; }
+    : function(p){ return p.hh80Rank; };
+  var refName = crowd ? "the crowd" : "the HoopsHype 80";
+  var refShort = crowd ? "crowd" : "HH80";
+  document.getElementById("risertag").textContent = "Your biggest riser vs " + refName;
+  document.getElementById("fallertag").textContent = "Your biggest faller vs " + refName;
+  var top25 = rows.slice(0,25);
+  var riser = null, faller = null;
+  top25.forEach(function(r){
+    var d = refRank(r.p) - r.rank;
+    if(!riser || d > (refRank(riser.p) - riser.rank)) riser = r;
+    if(!faller || d < (refRank(faller.p) - faller.rank)) faller = r;
+  });
+  var fmt = function(r){
+    var d = refRank(r.p) - r.rank;
+    var arrow = d > 0 ? "▲" + d : d < 0 ? "▼" + (-d) : "—";
+    return "<b>" + r.p.name + "</b> " + arrow + " (" + refShort + ": " + refRank(r.p) + ", you: " + r.rank + ")";
+  };
+  document.getElementById("riser").innerHTML = fmt(riser);
+  document.getElementById("faller").innerHTML = fmt(faller);
+}
+
+/* ---- share ---- */
+function shareLink(){
+  var w = CATS.map(function(c){ return weights[c.key]; }).join("-");
+  var url = location.origin + location.pathname + "?w=" + w;
+  history.replaceState(null, "", "?w=" + w);
+  document.title = "My GOAT Top 25 | GOAT Machine";
+  var note = document.getElementById("sharenote");
+  function done(ok){
+    note.textContent = ok ? "Link copied. Same sliders, same list, guaranteed." : url;
+    clearTimeout(note._t);
+    note._t = setTimeout(function(){ note.textContent = ""; }, 3500);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){ done(true); }, function(){ done(false); });
+  } else {
+    var ta = document.createElement("textarea");
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(true); } catch(e){ done(false); }
+    ta.remove();
+  }
+}
+
+/* ================= share card =================
+   1080x1350 canvas in the house social-card style (NBA Trade Machine /
+   comparison card): dark indigo gradient, #8B7CFF -> #FF5CA8 brand
+   gradient, Poppins, circle headshots with 1.2x overscan. */
+var CARD_W = 1080, CARD_H = 1350;
+var BRAND_A = "#8B7CFF", BRAND_B = "#FF5CA8";
+var FACE_OVERSCAN = 1.2;
+
+function openShareCard(){
+  var modal = document.createElement("div");
+  modal.id = "cardmodal";
+  modal.innerHTML =
+    '<div class="stage"><canvas id="sharecanvas" width="' + CARD_W + '" height="' + CARD_H + '"></canvas></div>' +
+    '<div class="cstatus" id="cardstatus">Building your card…</div>' +
+    '<div class="cardbtns">' +
+      '<button class="cbtn cp" id="cardcopy">Copy image</button>' +
+      '<button class="cbtn dl" id="carddl">Download PNG</button>' +
+      '<button class="cbtn cl" id="cardclose">Close</button>' +
+    "</div>";
+  document.body.appendChild(modal);
+  modal.addEventListener("click", function(e){ if(e.target === modal) modal.remove(); });
+  document.getElementById("cardclose").addEventListener("click", function(){ modal.remove(); });
+  renderShareCard();
+}
+
+function cardStatus(msg){ var el = document.getElementById("cardstatus"); if(el) el.textContent = msg; }
+
+function loadCardImage(url){
+  return new Promise(function(resolve){
+    if(!url){ resolve(null); return; }
+    var img = new Image();
+    img.crossOrigin = "anonymous";   /* github.io serves ACAO:* so the canvas stays clean */
+    img.onload = function(){ resolve(img); };
+    img.onerror = function(){ resolve(null); };
+    img.src = url;
+  });
+}
+
+function cardRoundRect(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+}
+function cardFaceCircle(c, img, cx, cy, r, name){
+  c.save();
+  c.beginPath(); c.arc(cx, cy, r, 0, Math.PI*2);
+  c.fillStyle = "#1b1740"; c.fill(); c.clip();
+  if(img){
+    var d = r * 2 * FACE_OVERSCAN;   /* overscan hides the bottom padding band */
+    c.drawImage(img, cx - d/2, cy - r, d, d);
+  } else {
+    c.fillStyle = "rgba(255,255,255,.85)";
+    c.font = "800 " + Math.round(r*0.7) + "px Poppins, sans-serif";
+    c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillText(initials(name), cx, cy);
+  }
+  c.restore();
+  c.beginPath(); c.arc(cx, cy, r, 0, Math.PI*2);
+  c.lineWidth = Math.max(3, r*0.06);
+  var g = c.createLinearGradient(cx-r, cy-r, cx+r, cy+r);
+  g.addColorStop(0, BRAND_A); g.addColorStop(1, BRAND_B);
+  c.strokeStyle = g; c.stroke();
+}
+
+function renderShareCard(){
+  var canvas = document.getElementById("sharecanvas");
+  if(!canvas || !DATA) return;
+  var c = canvas.getContext("2d");
+  var rows = ranked();
+  var top25 = rows.slice(0, 25);
+  var adj = adjective().label;
+
+  var fonts = ["600 24px Poppins","700 24px Poppins","800 24px Poppins","900 24px Poppins"]
+    .map(function(s){ return document.fonts.load(s).catch(function(){}); });
+  var faceUrls = top25.slice(0,5).map(function(r){
+    return r.p.headshot ? DATA.headshotBase + "face2/" + r.p.headshot + ".png" : null;
+  });
+  Promise.all([Promise.all(faceUrls.map(loadCardImage))].concat(fonts)).then(function(res){
+    var faces = res[0];
+    /* background */
+    var bg = c.createLinearGradient(0, 0, 0, CARD_H);
+    bg.addColorStop(0, "#0d0a22"); bg.addColorStop(1, "#241f4d");
+    c.fillStyle = bg; c.fillRect(0, 0, CARD_W, CARD_H);
+    c.save(); c.globalAlpha = 0.03;
+    for(var i=0;i<700;i++){ c.fillStyle = Math.random()>0.5?"#fff":"#000"; c.fillRect(Math.random()*CARD_W, Math.random()*CARD_H, 2, 2); }
+    c.restore();
+
+    /* header */
+    c.textAlign = "center";
+    c.fillStyle = "#a29bfe";
+    c.font = "700 26px Poppins, sans-serif";
+    c.fillText("G O A T   M A C H I N E", CARD_W/2, 78);
+    c.fillStyle = "#ffffff";
+    c.font = "900 66px Poppins, sans-serif";
+    c.fillText("MY GOAT TOP 25", CARD_W/2, 152);
+    /* adjective pill */
+    c.font = "700 30px Poppins, sans-serif";
+    var tw = c.measureText(adj).width;
+    var pw = tw + 76, px = (CARD_W - pw)/2, py = 182, ph = 56;
+    var pg = c.createLinearGradient(px, 0, px+pw, 0);
+    pg.addColorStop(0, BRAND_A); pg.addColorStop(1, BRAND_B);
+    cardRoundRect(c, px, py, pw, ph, 28); c.fillStyle = pg; c.fill();
+    c.fillStyle = "#ffffff"; c.fillText(adj, CARD_W/2, py + 39);
+
+    /* No. 1 */
+    var n1 = top25[0];
+    cardFaceCircle(c, faces[0], CARD_W/2, 400, 118, n1.p.name);
+    c.fillStyle = "#ffffff"; c.font = "800 46px Poppins, sans-serif";
+    c.fillText("1. " + n1.p.name, CARD_W/2, 580);
+    c.fillStyle = "#a29bfe"; c.font = "700 30px Poppins, sans-serif";
+    c.fillText(fmtScore(n1.score) + " pts", CARD_W/2, 622);
+
+    /* 2-5 */
+    var xs = [190, 423, 657, 890];
+    for(var k=1;k<5;k++){
+      var r5 = top25[k];
+      cardFaceCircle(c, faces[k], xs[k-1], 730, 74, r5.p.name);
+      c.fillStyle = "#f2f0ff"; c.font = "700 26px Poppins, sans-serif";
+      var nm = r5.p.name, size = 26;
+      while(c.measureText(nm).width > 215 && size > 17){ size--; c.font = "700 " + size + "px Poppins, sans-serif"; }
+      c.fillText(k+1 + ". " + nm, xs[k-1], 843);
+      c.fillStyle = "#a29dcf"; c.font = "600 22px Poppins, sans-serif";
+      c.fillText(fmtScore(r5.score), xs[k-1], 874);
+    }
+
+    /* 6-25 in two columns */
+    c.textAlign = "left";
+    var colX = [120, 585], startY = 940, lh = 38;
+    for(var j=5;j<25;j++){
+      var col = j < 15 ? 0 : 1;
+      var y = startY + (j - 5 - col*10) * lh;
+      var rr = top25[j];
+      c.fillStyle = "#a29bfe"; c.font = "700 24px Poppins, sans-serif";
+      c.fillText(String(rr.rank) + ".", colX[col], y);
+      c.fillStyle = "#f2f0ff"; c.font = "600 26px Poppins, sans-serif";
+      var nm2 = rr.p.name, s2 = 26;
+      while(c.measureText(nm2).width > 330 && s2 > 18){ s2--; c.font = "600 " + s2 + "px Poppins, sans-serif"; }
+      c.fillText(nm2, colX[col] + 58, y);
+    }
+
+    /* footer */
+    c.textAlign = "center";
+    var fg = c.createLinearGradient(CARD_W/2 - 260, 0, CARD_W/2 + 260, 0);
+    fg.addColorStop(0, BRAND_A); fg.addColorStop(1, BRAND_B);
+    c.fillStyle = fg; c.font = "800 30px Poppins, sans-serif";
+    c.fillText("Build yours: hoopsmatic.com/goat/ranking", CARD_W/2, 1322);
+
+    wireCardButtons(canvas);
+    cardStatus("");
+  });
+}
+
+function wireCardButtons(canvas){
+  var dl = document.getElementById("carddl"), cp = document.getElementById("cardcopy");
+  if(!dl) return;
+  dl.onclick = function(){
+    canvas.toBlob(function(blob){
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "my-goat-top25.png";
+      a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+    }, "image/png");
+  };
+  cp.onclick = function(){
+    canvas.toBlob(function(blob){
+      if(navigator.clipboard && window.ClipboardItem){
+        navigator.clipboard.write([new ClipboardItem({"image/png": blob})])
+          .then(function(){ cardStatus("Copied. Paste it anywhere."); },
+                function(){ cardStatus("Copy blocked by the browser - use Download."); });
+      } else cardStatus("Copy not supported here - use Download.");
+    }, "image/png");
+  };
+}
+
+/* back link: on hoopsmatic.com the hub lives at /goat, elsewhere index.html */
+(function(){
+  var m = location.pathname.match(/^(.*\/goat)(\/.*)?$/);
+  document.getElementById("backlink").href = m ? m[1] : "index.html";
+})();
+</script>
+</body>
+</html>

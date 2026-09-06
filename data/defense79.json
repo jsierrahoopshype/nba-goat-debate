@@ -1,0 +1,318 @@
+[
+ {
+  "rank": 1,
+  "player": "Bill Russell"
+ },
+ {
+  "rank": 2,
+  "player": "Hakeem Olajuwon"
+ },
+ {
+  "rank": 3,
+  "player": "Tim Duncan"
+ },
+ {
+  "rank": 4,
+  "player": "Kevin Garnett"
+ },
+ {
+  "rank": 5,
+  "player": "Dennis Rodman"
+ },
+ {
+  "rank": 6,
+  "player": "Scottie Pippen"
+ },
+ {
+  "rank": 7,
+  "player": "Ben Wallace"
+ },
+ {
+  "rank": 8,
+  "player": "Dikembe Mutombo"
+ },
+ {
+  "rank": 9,
+  "player": "Kareem Abdul-Jabbar"
+ },
+ {
+  "rank": 10,
+  "player": "Dwight Howard"
+ },
+ {
+  "rank": 11,
+  "player": "Wilt Chamberlain"
+ },
+ {
+  "rank": 12,
+  "player": "Rudy Gobert"
+ },
+ {
+  "rank": 13,
+  "player": "David Robinson"
+ },
+ {
+  "rank": 14,
+  "player": "Draymond Green"
+ },
+ {
+  "rank": 15,
+  "player": "Michael Jordan"
+ },
+ {
+  "rank": 16,
+  "player": "Gary Payton"
+ },
+ {
+  "rank": 17,
+  "player": "Giannis Antetokounmpo"
+ },
+ {
+  "rank": 18,
+  "player": "Mark Eaton"
+ },
+ {
+  "rank": 19,
+  "player": "Kawhi Leonard"
+ },
+ {
+  "rank": 20,
+  "player": "Bobby Jones"
+ },
+ {
+  "rank": 21,
+  "player": "Bruce Bowen"
+ },
+ {
+  "rank": 22,
+  "player": "Tony Allen"
+ },
+ {
+  "rank": 23,
+  "player": "Alonzo Mourning"
+ },
+ {
+  "rank": 24,
+  "player": "Metta World Peace"
+ },
+ {
+  "rank": 25,
+  "player": "Anthony Davis"
+ },
+ {
+  "rank": 26,
+  "player": "Nate Thurmond"
+ },
+ {
+  "rank": 27,
+  "player": "Marcus Camby"
+ },
+ {
+  "rank": 28,
+  "player": "Andre Iguodala"
+ },
+ {
+  "rank": 29,
+  "player": "Shaquille O'Neal"
+ },
+ {
+  "rank": 30,
+  "player": "John Havlicek"
+ },
+ {
+  "rank": 31,
+  "player": "Michael Cooper"
+ },
+ {
+  "rank": 32,
+  "player": "LeBron James"
+ },
+ {
+  "rank": 33,
+  "player": "Shawn Marion"
+ },
+ {
+  "rank": 34,
+  "player": "Patrick Ewing"
+ },
+ {
+  "rank": 35,
+  "player": "Andrei Kirilenko"
+ },
+ {
+  "rank": 36,
+  "player": "Kobe Bryant"
+ },
+ {
+  "rank": 37,
+  "player": "Tayshaun Prince"
+ },
+ {
+  "rank": 38,
+  "player": "Joe Dumars"
+ },
+ {
+  "rank": 39,
+  "player": "Alvin Robertson"
+ },
+ {
+  "rank": 40,
+  "player": "Dennis Johnson"
+ },
+ {
+  "rank": 41,
+  "player": "Tyson Chandler"
+ },
+ {
+  "rank": 42,
+  "player": "Jason Kidd"
+ },
+ {
+  "rank": 43,
+  "player": "Jrue Holiday"
+ },
+ {
+  "rank": 44,
+  "player": "Wes Unseld"
+ },
+ {
+  "rank": 45,
+  "player": "Marc Gasol"
+ },
+ {
+  "rank": 46,
+  "player": "Norm Van Lier"
+ },
+ {
+  "rank": 47,
+  "player": "Chris Paul"
+ },
+ {
+  "rank": 48,
+  "player": "Walt Frazier"
+ },
+ {
+  "rank": 49,
+  "player": "Sidney Moncrief"
+ },
+ {
+  "rank": 50,
+  "player": "Moses Malone"
+ },
+ {
+  "rank": 51,
+  "player": "Dave DeBusschere"
+ },
+ {
+  "rank": 52,
+  "player": "Kevin McHale"
+ },
+ {
+  "rank": 53,
+  "player": "Shane Battier"
+ },
+ {
+  "rank": 54,
+  "player": "Bam Adebayo"
+ },
+ {
+  "rank": 55,
+  "player": "Jimmy Butler"
+ },
+ {
+  "rank": 56,
+  "player": "Horace Grant"
+ },
+ {
+  "rank": 57,
+  "player": "Joakim Noah"
+ },
+ {
+  "rank": 58,
+  "player": "Maurice Cheeks"
+ },
+ {
+  "rank": 59,
+  "player": "Jerry Sloan"
+ },
+ {
+  "rank": 60,
+  "player": "John Stockton"
+ },
+ {
+  "rank": 61,
+  "player": "Jaren Jackson Jr."
+ },
+ {
+  "rank": 62,
+  "player": "Rajon Rondo"
+ },
+ {
+  "rank": 63,
+  "player": "Marcus Smart"
+ },
+ {
+  "rank": 64,
+  "player": "George Mikan"
+ },
+ {
+  "rank": 65,
+  "player": "Buck Williams"
+ },
+ {
+  "rank": 66,
+  "player": "Serge Ibaka"
+ },
+ {
+  "rank": 67,
+  "player": "Jerry West"
+ },
+ {
+  "rank": 68,
+  "player": "Elvin Hayes"
+ },
+ {
+  "rank": 69,
+  "player": "Charles Oakley"
+ },
+ {
+  "rank": 70,
+  "player": "Willis Reed"
+ },
+ {
+  "rank": 71,
+  "player": "Patrick Beverley"
+ },
+ {
+  "rank": 72,
+  "player": "Mookie Blaylock"
+ },
+ {
+  "rank": 73,
+  "player": "Nate McMillan"
+ },
+ {
+  "rank": 74,
+  "player": "Larry Bird"
+ },
+ {
+  "rank": 75,
+  "player": "Dwyane Wade"
+ },
+ {
+  "rank": 76,
+  "player": "Doug Christie"
+ },
+ {
+  "rank": 77,
+  "player": "Larry Nance"
+ },
+ {
+  "rank": 78,
+  "player": "Derek Harper"
+ },
+ {
+  "rank": 79,
+  "player": "Brook Lopez"
+ }
+]
