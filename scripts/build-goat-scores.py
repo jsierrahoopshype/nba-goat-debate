@@ -327,13 +327,15 @@ def main():
     for p, v in norm_leader(fin).items():
         scores[p]["finalsPerformance"] = v
 
-    # 7. Team success (deliberate overlap with 6) ----------------------
+    # 7. Team success in the NBA (deliberate overlap with 6) -----------
+    # One value per season, no double dipping: a title is 4 points and
+    # that's all that season gives; losing the Finals 2; losing the
+    # conference finals 1. Summed over the career. Calibration: Bill
+    # Russell first, Celtics dynasty players (Havlicek) right behind.
+    SEASON_PTS = {"Champion": 4, "Finalist": 2, "Conf Finalist": 1}
     team = {}
     for p, d in P.items():
-        chips = sum(1 for r in d["po_rows"] if r["RESULT"] == "Champion")
-        fapps = sum(1 for r in d["po_rows"] if r["RESULT"] in ("Finalist", "Champion"))
-        cf = sum(1 for r in d["po_rows"] if r["RESULT"] in ("Conf Finalist", "Finalist", "Champion"))
-        team[p] = chips * 3 + fapps * 1.5 + cf * 0.5
+        team[p] = sum(SEASON_PTS.get(r["RESULT"], 0) for r in d["po_rows"])
     for p, v in norm_leader(team).items():
         scores[p]["teamSuccess"] = v
 
