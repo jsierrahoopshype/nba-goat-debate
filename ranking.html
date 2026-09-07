@@ -811,8 +811,30 @@ function renderShareCard(){
     cardRoundRect(c, px, py, pw, ph, 28); c.fillStyle = pg; c.fill();
     c.fillStyle = "#ffffff"; c.fillText(adj, CARD_W/2, py + 39);
 
+    /* what they rate highly / lowly, mirroring the profile card's top/bottom 3 */
+    var byW = CATS.slice().sort(function(a,b){ return weights[b.key] - weights[a.key]; });
+    var hiLbls = byW.slice(0,3).map(function(cc){ return cc.label; }).join(" · ");
+    var loLbls = byW.slice(-3).reverse().map(function(cc){ return cc.label; }).join(" · ");
+    function statLine(y, arrow, arrowColor, labelTxt, bodyTxt){
+      var size = 22;
+      c.font = "600 " + size + "px Poppins, sans-serif";
+      var full = arrow + " " + labelTxt + " " + bodyTxt;
+      while(c.measureText(full).width > CARD_W - 110 && size > 15){
+        size--; c.font = "600 " + size + "px Poppins, sans-serif";
+      }
+      var x = (CARD_W - c.measureText(full).width) / 2;
+      c.textAlign = "left";
+      c.fillStyle = arrowColor;
+      c.fillText(arrow + " " + labelTxt, x, y);
+      c.fillStyle = "#dcd8f5";
+      c.fillText(bodyTxt, x + c.measureText(arrow + " " + labelTxt + " ").width, y);
+      c.textAlign = "center";
+    }
+    statLine(274, "▲", "#4ade80", "Cares most:", hiLbls);
+    statLine(304, "▼", "#fb7185", "Cares least:", loLbls);
+
     /* Top 25 as five rows of five, mirroring the page grid */
-    var cellW = CARD_W / 5, gridTop = 296, rowH = 196, R = 58;
+    var cellW = CARD_W / 5, gridTop = 320, rowH = 196, R = 58;
     for(var j=0;j<25;j++){
       var col = j % 5, row = Math.floor(j / 5);
       var cx = col * cellW + cellW/2;
