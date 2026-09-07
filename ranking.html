@@ -136,6 +136,37 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .lead-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 8px;border-radius:6px}
 .lead-row:nth-child(odd){background:var(--page)}
 .lead-row .v{font-family:var(--mono);font-weight:600}
+.pname{cursor:pointer;text-decoration:underline dotted var(--text-secondary);text-underline-offset:3px}
+.pname:hover{color:var(--accent)}
+#crowddetail{
+  margin-top:8px;padding:9px 10px;border-radius:8px;background:var(--accent-dim);
+  font-size:12.5px;line-height:1.5;
+}
+.crowd80{
+  display:inline-block;margin-top:10px;font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;color:var(--accent);text-decoration:none;
+}
+.crowd80:hover{text-decoration:underline}
+#crowd80modal{
+  position:fixed;inset:0;background:rgba(29,29,31,.45);z-index:60;
+  display:flex;align-items:center;justify-content:center;padding:18px;
+}
+#crowd80modal .box{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  width:min(94vw,560px);max-height:84vh;display:flex;flex-direction:column;overflow:hidden;
+}
+#crowd80modal .box-head{
+  padding:13px 16px;border-bottom:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between;
+}
+#crowd80modal .box-head .section-title{margin:0}
+#crowd80modal .closex{border:none;background:none;font-size:20px;cursor:pointer;color:var(--text-secondary);line-height:1}
+#crowd80modal .rows{overflow-y:auto;padding:8px 12px 14px}
+.c80-row{display:grid;grid-template-columns:34px 1fr 92px 118px;gap:8px;align-items:baseline;font-size:13px;padding:5px 6px;border-radius:6px}
+.c80-row:nth-child(odd){background:var(--page)}
+.c80-row .r{font-family:var(--mono);font-weight:700;color:var(--text-secondary)}
+.c80-row .m{font-family:var(--mono);font-size:11.5px;color:var(--text-secondary);text-align:right}
+.c80-head{font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary)}
+@media(max-width:520px){.c80-row{grid-template-columns:30px 1fr 78px 96px;font-size:12px}}
 .movers{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
 .mover{flex:1;min-width:140px;padding:9px 10px;border-radius:8px;background:var(--page);font-size:13px}
 .mover .tag{font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:2px}
@@ -162,7 +193,9 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 #cardmodal .cbtn.cp{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.25)}
 #cardmodal .cbtn.cl{background:transparent;border:1.5px solid rgba(255,255,255,.25);color:#a29dcf}
 #cardmodal .cstatus{font-family:'Poppins',Arial,sans-serif;font-size:12px;color:#a29dcf;min-height:16px;text-align:center}
-footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--hair);font-size:12px;color:var(--text-secondary)}
+footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--hair);font-size:12px;color:var(--text-secondary);line-height:1.6}
+footer a{text-decoration:underline;text-underline-offset:2px}
+footer a:hover{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -204,13 +237,19 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--hair);font-si
           <div id="leaderboard"></div>
           <div class="wlbl" id="crowdlbl" hidden>What the crowd says</div>
           <div id="crowdlist"></div>
+          <div id="crowddetail" hidden></div>
+          <a href="#" id="crowd80link" class="crowd80" hidden>See the crowd's full 80 &rarr;</a>
           <div class="movers">
             <div class="mover up"><span class="tag" id="risertag">Your biggest riser</span><span id="riser"></span></div>
             <div class="mover down"><span class="tag" id="fallertag">Your biggest faller</span><span id="faller"></span></div>
           </div>
         </div>
       </div>
-      <footer>Pool: the 80 players of the HoopsHype 80 (July 2026). Scores precomputed from HoopsHype lists, the All-Time Database, and stated GOAT picks by NBA players. A HoopsMatic tool.</footer>
+      <footer>
+        Pool: the 80 players of the <a href="https://www.hoopshype.com/story/sports/nba/2026/07/26/80-greatest-nba-players-ever-hoopshype-list/90931094007/" target="_blank" rel="noopener">HoopsHype 80</a> (July 2026). Scores precomputed from HoopsHype lists, the All-Time Database, and stated GOAT picks by NBA players. A HoopsMatic tool.<br>
+        Anything wrong with the game? Email us at <a href="mailto:hoopshype@hoopshype.com">hoopshype@hoopshype.com</a><br>
+        For business inquiries, contact us at <a href="mailto:ads@hoopshype.com">ads@hoopshype.com</a>
+      </footer>
     </div>
   </div>
 </main>
@@ -299,7 +338,7 @@ function loadCrowd(){
     entries.sort(function(a,b){ return a.avg - b.avg || a.hh - b.hh; });
     var rank = {};
     entries.forEach(function(e,i){ rank[e.hh] = i + 1; });
-    crowd = {count: d.count, rank: rank};
+    crowd = {count: d.count, rank: rank, stats: d.stats || null};
     if(DATA) recompute();
   }).catch(function(){ /* consensus is optional */ });
 }
@@ -525,7 +564,12 @@ function adjective(){
 }
 
 /* ---- consensus card ---- */
+var lastRows = null;
+function pnameSpan(p){
+  return '<span class="pname" data-hh="' + p.hh80Rank + '">' + p.name + "</span>";
+}
 function renderConsensus(rows){
+  lastRows = rows;
   var no1 = rows[0].p;
   var agree = no1.pickSharePct;
   document.getElementById("agree").innerHTML =
@@ -536,7 +580,7 @@ function renderConsensus(rows){
   var leaders = DATA.players.filter(function(p){ return p.pickSharePct > 0; })
     .sort(function(a,b){ return b.pickSharePct - a.pickSharePct; }).slice(0,6);
   document.getElementById("leaderboard").innerHTML = leaders.map(function(p){
-    return '<div class="lead-row"><span>' + p.name + '</span><span class="v">' + p.pickSharePct + "%</span></div>";
+    return '<div class="lead-row"><span>' + pnameSpan(p) + '</span><span class="v">' + p.pickSharePct + "%</span></div>";
   }).join("");
   /* the crowd's own Top 5, once enough lists are in */
   var byName = {};
@@ -548,9 +592,10 @@ function renderConsensus(rows){
     lbl.textContent = "What the crowd's lists say (" + crowd.count.toLocaleString("en-US") + " lists)";
     document.getElementById("crowdlist").innerHTML = order.slice(0,5).map(function(hh,i){
       var userRow = rows.filter(function(r){ return r.p.hh80Rank === +hh; })[0];
-      return '<div class="lead-row"><span>' + (i+1) + ". " + byName[hh].name +
+      return '<div class="lead-row"><span>' + pnameSpan(byName[hh]) +
              '</span><span class="v">you: ' + (userRow ? userRow.rank : "-") + "</span></div>";
     }).join("");
+    document.getElementById("crowd80link").hidden = false;
   }
   /* biggest mover within the user's Top 25 - vs the crowd when we have it,
      vs the official HoopsHype 80 otherwise */
@@ -576,6 +621,69 @@ function renderConsensus(rows){
   document.getElementById("riser").innerHTML = fmt(riser);
   document.getElementById("faller").innerHTML = fmt(faller);
 }
+
+/* ---- clickable player names: where the crowd puts each guy ---- */
+var detailHH = null;
+function showPlayerDetail(hh){
+  var box = document.getElementById("crowddetail");
+  if(detailHH === hh && !box.hidden){ box.hidden = true; detailHH = null; return; }
+  detailHH = hh;
+  var p = null;
+  DATA.players.forEach(function(x){ if(x.hh80Rank === hh) p = x; });
+  if(!p) return;
+  var bits = [];
+  if(crowd && crowd.rank[hh]){
+    var s = crowd.stats && crowd.stats[hh];
+    bits.push("The crowd ranks him <b>No. " + crowd.rank[hh] + "</b>" +
+      (s ? " (average spot: " + s.avg + ")." : "."));
+    if(s && s.mode) bits.push("Ranked <b>No. " + s.mode + "</b> most often: " +
+      s.modePct + "% of lists put him exactly there.");
+  } else {
+    bits.push("Not enough crowd lists yet to place him.");
+  }
+  bits.push("HoopsHype 80: No. " + hh + ".");
+  if(lastRows){
+    var ur = lastRows.filter(function(r){ return r.p.hh80Rank === hh; })[0];
+    if(ur) bits.push("You: No. " + ur.rank + ".");
+  }
+  if(p.pickSharePct > 0) bits.push(p.pickSharePct + "% of NBA players with a stated GOAT pick chose him.");
+  box.innerHTML = "<b>" + p.name + "</b> &middot; " + bits.join(" ");
+  box.hidden = false;
+}
+document.addEventListener("click", function(e){
+  var t = e.target.closest ? e.target.closest(".pname") : null;
+  if(t) showPlayerDetail(+t.dataset.hh);
+});
+
+/* ---- the crowd's full 80 modal ---- */
+function openCrowd80(e){
+  if(e) e.preventDefault();
+  if(!crowd || !DATA) return;
+  var byName = {};
+  DATA.players.forEach(function(p){ byName[p.hh80Rank] = p; });
+  var order = Object.keys(crowd.rank).sort(function(a,b){ return crowd.rank[a] - crowd.rank[b]; });
+  var rowsHtml = '<div class="c80-row c80-head"><span class="r">#</span><span>Player</span>' +
+    '<span class="m">avg spot</span><span class="m">most often</span></div>';
+  rowsHtml += order.map(function(hh){
+    var p = byName[hh];
+    if(!p) return "";
+    var s = crowd.stats && crowd.stats[hh];
+    var avg = s ? s.avg : "&mdash;";
+    var mode = s && s.mode ? "No. " + s.mode + " (" + s.modePct + "%)" : "&mdash;";
+    return '<div class="c80-row"><span class="r">' + crowd.rank[hh] + "</span><span>" + p.name +
+      '</span><span class="m">' + avg + '</span><span class="m">' + mode + "</span></div>";
+  }).join("");
+  var modal = document.createElement("div");
+  modal.id = "crowd80modal";
+  modal.innerHTML = '<div class="box"><div class="box-head">' +
+    '<h3 class="section-title">The crowd\'s full 80 &middot; ' + crowd.count.toLocaleString("en-US") + " lists</h3>" +
+    '<button class="closex" aria-label="Close">&times;</button></div>' +
+    '<div class="rows">' + rowsHtml + "</div></div>";
+  document.body.appendChild(modal);
+  modal.addEventListener("click", function(ev){ if(ev.target === modal) modal.remove(); });
+  modal.querySelector(".closex").addEventListener("click", function(){ modal.remove(); });
+}
+document.getElementById("crowd80link").addEventListener("click", openCrowd80);
 
 /* ---- share ---- */
 function shareLink(){
