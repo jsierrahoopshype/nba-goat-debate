@@ -811,10 +811,21 @@ function renderShareCard(){
     cardRoundRect(c, px, py, pw, ph, 28); c.fillStyle = pg; c.fill();
     c.fillStyle = "#ffffff"; c.fillText(adj, CARD_W/2, py + 39);
 
-    /* what they rate highly / lowly, mirroring the profile card's top/bottom 3 */
+    /* what they rate highly / lowly: top/bottom 4, dropping to 3 if the
+       labels would not fit on one line even at the minimum font size */
     var byW = CATS.slice().sort(function(a,b){ return weights[b.key] - weights[a.key]; });
-    var hiLbls = byW.slice(0,3).map(function(cc){ return cc.label; }).join(" · ");
-    var loLbls = byW.slice(-3).reverse().map(function(cc){ return cc.label; }).join(" · ");
+    function pickLabels(take, fromTop){
+      var arr = fromTop ? byW.slice(0, take) : byW.slice(-take).reverse();
+      return arr.map(function(cc){ return cc.label; }).join(" · ");
+    }
+    function lineFits(arrow, labelTxt, bodyTxt){
+      c.font = "600 15px Poppins, sans-serif";
+      return c.measureText(arrow + " " + labelTxt + " " + bodyTxt).width <= CARD_W - 110;
+    }
+    var hiLbls = pickLabels(4, true);
+    if(!lineFits("▲", "Cares most:", hiLbls)) hiLbls = pickLabels(3, true);
+    var loLbls = pickLabels(4, false);
+    if(!lineFits("▼", "Cares least:", loLbls)) loLbls = pickLabels(3, false);
     function statLine(y, arrow, arrowColor, labelTxt, bodyTxt){
       var size = 22;
       c.font = "600 " + size + "px Poppins, sans-serif";
