@@ -257,7 +257,7 @@ var crowd = null;   /* {count, rank:{hh80Rank: crowdPosition}} */
 var DATA = null;
 var weights = {};
 var DEFAULTS = {};
-CATS.forEach(function(c){ DEFAULTS[c.key] = c.key === "abaCredit" ? 50 : 0; });
+CATS.forEach(function(c){ DEFAULTS[c.key] = c.key === "abaCredit" ? 1 : 0; });
 CATS.forEach(function(c){ weights[c.key] = DEFAULTS[c.key]; });
 
 /* ---- URL weights (?w=50-50-...-50 in CATS order) ---- */
@@ -440,10 +440,10 @@ function renderGrid(top){
       ? '<div class="headshot-wrap"><img loading="lazy" src="' + url + '" alt="' + p.name + '" ' +
         'onerror="imgFallback(this)" data-step="0"></div>'
       : '<div class="no-img">' + initials(p.name) + "</div>";
+    /* no score line on the cards - the ranking itself is the result */
     return '<div class="card pcard' + (r.rank === 1 ? " first" : "") + '">' +
       '<span class="rk">' + r.rank + "</span>" + chip + img +
-      '<div class="nm">' + p.name + '</div>' +
-      '<div class="sc">' + fmtScore(r.score) + "</div></div>";
+      '<div class="nm">' + p.name + "</div></div>";
   }).join("");
   document.getElementById("grid").innerHTML = html;
 }
@@ -673,8 +673,8 @@ function renderShareCard(){
 
   var fonts = ["600 24px Poppins","700 24px Poppins","800 24px Poppins","900 24px Poppins"]
     .map(function(s){ return document.fonts.load(s).catch(function(){}); });
-  var faceUrls = top25.slice(0,5).map(function(r){
-    return r.p.headshot ? DATA.headshotBase + "face2/" + r.p.headshot + ".png" : null;
+  var faceUrls = top25.map(function(r){
+    return r.p.headshot ? DATA.headshotBase + "face2-160/" + r.p.headshot + ".webp" : null;
   });
   Promise.all([Promise.all(faceUrls.map(loadCardImage))].concat(fonts)).then(function(res){
     var faces = res[0];
@@ -693,7 +693,7 @@ function renderShareCard(){
     c.fillText("G O A T   M A C H I N E", CARD_W/2, 78);
     c.fillStyle = "#ffffff";
     c.font = "900 66px Poppins, sans-serif";
-    c.fillText("MY GOAT TOP 25", CARD_W/2, 152);
+    c.fillText("MY GOAT RANKING", CARD_W/2, 152);
     /* adjective pill */
     c.font = "700 30px Poppins, sans-serif";
     var tw = c.measureText(adj).width;
@@ -703,40 +703,28 @@ function renderShareCard(){
     cardRoundRect(c, px, py, pw, ph, 28); c.fillStyle = pg; c.fill();
     c.fillStyle = "#ffffff"; c.fillText(adj, CARD_W/2, py + 39);
 
-    /* No. 1 */
-    var n1 = top25[0];
-    cardFaceCircle(c, faces[0], CARD_W/2, 400, 118, n1.p.name);
-    c.fillStyle = "#ffffff"; c.font = "800 46px Poppins, sans-serif";
-    c.fillText("1. " + n1.p.name, CARD_W/2, 580);
-    c.fillStyle = "#a29bfe"; c.font = "700 30px Poppins, sans-serif";
-    c.fillText(fmtScore(n1.score) + " pts", CARD_W/2, 622);
-
-    /* 2-5 */
-    var xs = [190, 423, 657, 890];
-    for(var k=1;k<5;k++){
-      var r5 = top25[k];
-      cardFaceCircle(c, faces[k], xs[k-1], 730, 74, r5.p.name);
-      c.fillStyle = "#f2f0ff"; c.font = "700 26px Poppins, sans-serif";
-      var nm = r5.p.name, size = 26;
-      while(c.measureText(nm).width > 215 && size > 17){ size--; c.font = "700 " + size + "px Poppins, sans-serif"; }
-      c.fillText(k+1 + ". " + nm, xs[k-1], 843);
-      c.fillStyle = "#a29dcf"; c.font = "600 22px Poppins, sans-serif";
-      c.fillText(fmtScore(r5.score), xs[k-1], 874);
-    }
-
-    /* 6-25 in two columns */
-    c.textAlign = "left";
-    var colX = [120, 585], startY = 940, lh = 38;
-    for(var j=5;j<25;j++){
-      var col = j < 15 ? 0 : 1;
-      var y = startY + (j - 5 - col*10) * lh;
+    /* Top 25 as five rows of five, mirroring the page grid */
+    var cellW = CARD_W / 5, gridTop = 296, rowH = 196, R = 58;
+    for(var j=0;j<25;j++){
+      var col = j % 5, row = Math.floor(j / 5);
+      var cx = col * cellW + cellW/2;
+      var rowY = gridTop + row * rowH;
       var rr = top25[j];
-      c.fillStyle = "#a29bfe"; c.font = "700 24px Poppins, sans-serif";
-      c.fillText(String(rr.rank) + ".", colX[col], y);
-      c.fillStyle = "#f2f0ff"; c.font = "600 26px Poppins, sans-serif";
-      var nm2 = rr.p.name, s2 = 26;
-      while(c.measureText(nm2).width > 330 && s2 > 18){ s2--; c.font = "600 " + s2 + "px Poppins, sans-serif"; }
-      c.fillText(nm2, colX[col] + 58, y);
+      cardFaceCircle(c, faces[j], cx, rowY + R, R, rr.p.name);
+      /* rank badge on the circle */
+      var bx = cx - R + 6, by = rowY + 6;
+      c.beginPath(); c.arc(bx, by, 20, 0, Math.PI*2);
+      c.fillStyle = j === 0 ? BRAND_B : "#1b1740"; c.fill();
+      c.fillStyle = "#ffffff"; c.font = "800 20px Poppins, sans-serif";
+      c.textBaseline = "middle";
+      c.fillText(String(rr.rank), bx, by + 1);
+      c.textBaseline = "alphabetic";
+      /* name */
+      var nm = rr.p.name, s2 = 22;
+      c.font = "600 22px Poppins, sans-serif";
+      while(c.measureText(nm).width > cellW - 18 && s2 > 15){ s2--; c.font = "600 " + s2 + "px Poppins, sans-serif"; }
+      c.fillStyle = j === 0 ? "#ffffff" : "#f2f0ff";
+      c.fillText(nm, cx, rowY + R*2 + 36);
     }
 
     /* footer */
