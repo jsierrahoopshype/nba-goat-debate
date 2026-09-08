@@ -464,22 +464,29 @@ def main():
         scores[p]["defense"] = v
 
     # 12. Loyalty -------------------------------------------------------
-    # Share of career RS GP with the primary franchise (TEAM codes in
-    # rsStats are already franchise-normalized across moves), +10 flat
-    # before normalization for a true one-franchise career.
+    # Share of career RS GP with the player's main franchise, plus half a
+    # point per season spent there (so among the 100% one-team guys, the
+    # longest tenures rank highest: Dirk 21 > Kobe 20 > Stockton/Duncan
+    # 19...), plus 5 when the main team is also his first team.
     loy = {}
     for p, d in P.items():
         by_team = defaultdict(float)
-        for r in d["rs_rows"]:
+        seasons_team = defaultdict(int)
+        first_team = None
+        for r in sorted(d["rs_rows"], key=lambda r: int(r["YEAR"])):
             by_team[r["TEAM"]] += num(r["GP"]) or 0
+            seasons_team[r["TEAM"]] += 1
+            if first_team is None:
+                first_team = r["TEAM"]
         total = sum(by_team.values())
         if not total:
             loy[p] = 0
             continue
-        share = max(by_team.values()) / total * 100
-        if len(by_team) == 1:
-            share += 10
-        loy[p] = share
+        main = max(by_team, key=by_team.get)
+        v = by_team[main] / total * 100 + seasons_team[main] * 0.5
+        if main == first_team:
+            v += 5
+        loy[p] = v
     for p, v in norm_leader(loy).items():
         scores[p]["loyalty"] = v
 
