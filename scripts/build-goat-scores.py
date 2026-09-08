@@ -208,7 +208,10 @@ def main():
         prow = po_rows.get(s, [])
         est = estimates.get(p)
         t, gp, stl, gp_stl, blk, gp_blk = agg(rrows, est)
-        pt, pgp, pstl, pgp_stl, pblk, pgp_blk = agg(prow, est)
+        # playoff samples are shakier: estimates count at half strength there
+        po_est = ({k: v * 0.5 for k, v in est.items() if isinstance(v, (int, float))}
+                  if est else None)
+        pt, pgp, pstl, pgp_stl, pblk, pgp_blk = agg(prow, po_est)
         P[p] = dict(rs_t=t, rs_gp=gp, rs_stl=stl, rs_gp_stl=gp_stl, rs_blk=blk, rs_gp_blk=gp_blk,
                     po_t=pt, po_gp=pgp, po_stl=pstl, po_gp_stl=pgp_stl, po_blk=pblk, po_gp_blk=pgp_blk,
                     rs_rows=rrows, po_rows=prow,
@@ -226,7 +229,21 @@ def main():
         out["BLK"] = (d[f"{which}_blk"] / d[f"{which}_gp_blk"]) if d[f"{which}_blk"] is not None and d[f"{which}_gp_blk"] else None
         return out
 
-    cat1 = composite({p: pergame(d, "rs") for p, d in P.items()})
+    # ppg + rpg + apg + spg + bpg (estimates fill untracked years), nudged
+    # A BIT by career TS%: factor runs 0.93 (pool-worst shooter) to 1.07
+    # (pool-best), linear in between.
+    ts_all = {}
+    for p, d in P.items():
+        t = d["rs_t"]
+        denom = 2 * (t["FGA"] + 0.44 * t["FTA"])
+        ts_all[p] = t["PTS"] / denom if denom else 0
+    ts_lo, ts_hi = min(ts_all.values()), max(ts_all.values())
+    def ts_factor(p):
+        return 0.93 + 0.14 * (ts_all[p] - ts_lo) / (ts_hi - ts_lo)
+    def pg_sum(d, which):
+        v = pergame(d, which)
+        return sum(x for x in v.values() if x is not None)
+    cat1 = {p: pg_sum(d, "rs") * ts_factor(p) for p, d in P.items()}
     for p, v in norm_leader(cat1).items():
         scores[p]["careerAverages"] = v
 
@@ -327,12 +344,30 @@ def main():
         scores[p]["peak"] = v
 
     # 5. Playoff performance -------------------------------------------
-    ROUNDS = {"First Round": 0, "Conf Semis": 1, "Conf Finalist": 2, "Finalist": 3, "Champion": 4}
+    # 45% per-game playoff production (weighted composite, nudged by
+    # playoff TS%: 0.93x-1.07x) + 30% accumulated playoff production
+    # (career playoff PTS+REB+AST+STL+BLK) + 25% playoff team success
+    # (title 4 / Finals loss 2 / conf-finals loss 1, one per season).
+    # Old-era steal/block estimates count at half strength in playoffs.
     po_comp = composite({p: pergame(d, "po") for p, d in P.items()})
     po_comp_n = norm_leader(po_comp)
-    rounds_won = {p: sum(ROUNDS.get(r["RESULT"], 0) for r in d["po_rows"]) for p, d in P.items()}
-    rounds_n = norm_leader(rounds_won)
-    blend = {p: 0.75 * po_comp_n[p] + 0.25 * rounds_n[p] for p in pool_names}
+    po_ts = {}
+    for p, d in P.items():
+        t = d["po_t"]
+        denom = 2 * (t["FGA"] + 0.44 * t["FTA"])
+        po_ts[p] = t["PTS"] / denom if denom else 0
+    pts_vals = [v for v in po_ts.values() if v > 0]
+    plo, phi = min(pts_vals), max(pts_vals)
+    def po_ts_factor(p):
+        return 0.93 + 0.14 * (max(po_ts[p], plo) - plo) / (phi - plo)
+    comp_adj = norm_leader({p: po_comp_n[p] * po_ts_factor(p) for p in pool_names})
+    po_acc = norm_leader({p: (d["po_t"]["PTS"] or 0) + (d["po_t"]["REB"] or 0)
+                          + (d["po_t"]["AST"] or 0) + (d["po_stl"] or 0)
+                          + (d["po_blk"] or 0) for p, d in P.items()})
+    PO_SEASON = {"Champion": 4, "Finalist": 2, "Conf Finalist": 1}
+    po_team = norm_leader({p: sum(PO_SEASON.get(r["RESULT"], 0) for r in d["po_rows"])
+                           for p, d in P.items()})
+    blend = {p: 0.45 * comp_adj[p] + 0.30 * po_acc[p] + 0.25 * po_team[p] for p in pool_names}
     for p, v in norm_leader(blend).items():
         scores[p]["playoffPerformance"] = v
 
@@ -362,41 +397,32 @@ def main():
         scores[p]["teamSuccess"] = v
 
     # 8. Accolades ------------------------------------------------------
-    # Weight per award type = share of its RETIRED winners (no rsStats row
-    # in 2025 or 2026) who are in the Hall of Fame, computed from the Hall
-    # of Fame rows in awards.json itself. Coach awards and the Hall of
-    # Fame rows are excluded; types with no retired winners yet get the
-    # overall retired-winner HoF share as a neutral default.
-    active = {r["PLAYER"] for r in rs if r["YEAR"] in ("2025", "2026")}
-    hof = {r["PLAYER / COACH"] for r in awards if r["AWARD"] == "Hall of Fame"}
-    EXCLUDE = {"Hall of Fame", "Coach of the Month", "Coach of the Year", "NBA Champion Coach"}
-    by_type = defaultdict(set)
-    for r in awards:
-        if r["AWARD"] not in EXCLUDE:
-            by_type[r["AWARD"]].add(r["PLAYER / COACH"])
-    all_retired = set()
-    for t, ws in by_type.items():
-        all_retired |= {w for w in ws if w not in active}
-    overall_share = len(all_retired & hof) / len(all_retired)
-    weight = {}
-    for t, ws in by_type.items():
-        retired = {w for w in ws if w not in active}
-        weight[t] = (len(retired & hof) / len(retired)) if retired else overall_share
+    # Fixed points per award, importance order set editorially:
+    # MVP > Finals MVP > All-NBA 1st > 2nd > 3rd > All-Star > DPOY >
+    # All-Defensive 1st > 2nd.
+    ACC_PTS = {
+        "Most Valuable Player": 10,
+        "Finals MVP": 8,
+        "All-NBA First Team": 6,
+        "All-NBA Second Team": 4,
+        "All-NBA Third Team": 3,
+        "All-Star": 2,
+        "Defensive Player of the Year": 1.5,
+        "All-Defensive First Team": 1,
+        "All-Defensive Second Team": 0.5,
+    }
     acc = {}
     for p, d in P.items():
-        acc[p] = sum(weight.get(a["AWARD"], 0) for a in d["awards"] if a["AWARD"] not in EXCLUDE)
+        acc[p] = sum(ACC_PTS.get(a["AWARD"], 0) for a in d["awards"])
     for p, v in norm_leader(acc).items():
         scores[p]["accolades"] = v
 
-    # 9. Longevity: years of relevance ---------------------------------
-    # Seasons with any award votes, an All-Star nod, or any other award
-    # instance that season (the last clause catches pre-1956 seasons,
-    # before MVP voting existed, via All-NBA teams / scoring titles etc.)
+    # 9. Sustained excellence: All-Star selections plus All-NBA First or
+    # Second Team selections, one point each.
+    LON_AWARDS = ("All-Star", "All-NBA First Team", "All-NBA Second Team")
     lon = {}
     for p, d in P.items():
-        ys = {int(v["YEAR"]) for v in d["votes"]}
-        ys |= {int(a["YEAR"]) for a in d["awards"] if a["AWARD"] not in ("Hall of Fame",) and a["YEAR"]}
-        lon[p] = len(ys)
+        lon[p] = sum(1 for a in d["awards"] if a["AWARD"] in LON_AWARDS)
     for p, v in norm_leader(lon).items():
         scores[p]["longevity"] = v
 
