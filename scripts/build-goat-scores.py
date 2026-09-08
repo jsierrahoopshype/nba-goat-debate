@@ -93,6 +93,8 @@ def main():
     offcourt = load_repo("offcourt.json")
     peers_curated = load_repo("peers.json")
     aba = load_repo("aba.json")
+    estimates = load_repo("estimated-stats.json")   # per-game STL/BLK for untracked seasons
+    advanced = load_repo("advanced-metrics.json")   # career PER / WS48 / BPM (bbref)
 
     # GOAT picks payload lives inside index.html (the GOAT Debate page)
     html = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
@@ -152,7 +154,7 @@ def main():
         season_max_gp[y] = max(players.values())
 
     # helper: career aggregation over rs/po rows ------------------------
-    def agg(rows):
+    def agg(rows, est=None):
         t = defaultdict(float)
         gp_all = 0.0
         gp_stl = gp_blk = 0.0  # GP only in seasons where the stat was recorded
@@ -165,6 +167,11 @@ def main():
                 if v is not None:
                     t[k] += v
             s, b = num(r["STL"]), num(r["BLK"])
+            # untracked season + estimate available -> per-game est x GP
+            if s is None and est and est.get("stl") is not None:
+                s = est["stl"] * gp
+            if b is None and est and est.get("blk") is not None:
+                b = est["blk"] * gp
             if s is not None:
                 stl = (stl or 0) + s
                 gp_stl += gp
@@ -199,8 +206,9 @@ def main():
         s = src_name(p)
         rrows = rs_rows.get(s, [])
         prow = po_rows.get(s, [])
-        t, gp, stl, gp_stl, blk, gp_blk = agg(rrows)
-        pt, pgp, pstl, pgp_stl, pblk, pgp_blk = agg(prow)
+        est = estimates.get(p)
+        t, gp, stl, gp_stl, blk, gp_blk = agg(rrows, est)
+        pt, pgp, pstl, pgp_stl, pblk, pgp_blk = agg(prow, est)
         P[p] = dict(rs_t=t, rs_gp=gp, rs_stl=stl, rs_gp_stl=gp_stl, rs_blk=blk, rs_gp_blk=gp_blk,
                     po_t=pt, po_gp=pgp, po_stl=pstl, po_gp_stl=pgp_stl, po_blk=pblk, po_gp_blk=pgp_blk,
                     rs_rows=rrows, po_rows=prow,
@@ -222,23 +230,37 @@ def main():
     for p, v in norm_leader(cat1).items():
         scores[p]["careerAverages"] = v
 
-    # 2. Accumulated stats ---------------------------------------------
-    def totals(d, which):
+    # 2. Accumulated stats: career PTS + REB + AST + STL + BLK, one raw
+    # sum (steals/blocks for untracked seasons come from the estimates file)
+    def totsum(d, which):
         t = d[f"{which}_t"]
-        return {"PTS": t["PTS"] or None, "REB": t["REB"] or None, "AST": t["AST"] or None,
-                "STL": d[f"{which}_stl"], "BLK": d[f"{which}_blk"]}
+        return ((t["PTS"] or 0) + (t["REB"] or 0) + (t["AST"] or 0)
+                + (d[f"{which}_stl"] or 0) + (d[f"{which}_blk"] or 0))
 
-    cat2 = composite({p: totals(d, "rs") for p, d in P.items()})
+    cat2 = {p: totsum(d, "rs") for p, d in P.items()}
     for p, v in norm_leader(cat2).items():
         scores[p]["accumulatedStats"] = v
 
-    # 3. Efficiency: career TS% ----------------------------------------
+    # 3. Efficiency: equal-weight blend of career PER, WS/48, BPM
+    # (basketball-reference, data/advanced-metrics.json) and career TS%
+    # computed here. Each metric normalized pool-leader = 100; players with
+    # no career BPM (pre-1974 careers) are averaged over the other three.
     ts = {}
     for p, d in P.items():
         t = d["rs_t"]
         denom = 2 * (t["FGA"] + 0.44 * t["FTA"])
         ts[p] = t["PTS"] / denom if denom else 0
-    for p, v in norm_leader(ts).items():
+    ts_n = norm_leader(ts)
+    adv_n = {}
+    for metric in ("per", "ws48", "bpm"):
+        vals = {p: advanced[p][metric] for p in pool_names
+                if advanced.get(p, {}).get(metric) is not None}
+        adv_n[metric] = norm_leader({p: max(v, 0) for p, v in vals.items()})
+    eff = {}
+    for p in pool_names:
+        parts = [ts_n[p]] + [adv_n[m][p] for m in ("per", "ws48", "bpm") if p in adv_n[m]]
+        eff[p] = sum(parts) / len(parts)
+    for p, v in norm_leader(eff).items():
         scores[p]["efficiency"] = v
 
     # 4. Peak -----------------------------------------------------------
@@ -310,7 +332,7 @@ def main():
     po_comp_n = norm_leader(po_comp)
     rounds_won = {p: sum(ROUNDS.get(r["RESULT"], 0) for r in d["po_rows"]) for p, d in P.items()}
     rounds_n = norm_leader(rounds_won)
-    blend = {p: 0.6 * po_comp_n[p] + 0.4 * rounds_n[p] for p in pool_names}
+    blend = {p: 0.75 * po_comp_n[p] + 0.25 * rounds_n[p] for p in pool_names}
     for p, v in norm_leader(blend).items():
         scores[p]["playoffPerformance"] = v
 
