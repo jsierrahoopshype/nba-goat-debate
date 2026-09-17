@@ -72,6 +72,15 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 }
 .zero-msg.show{opacity:1}
 .panel-btns{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+#btnslot .panel-btns{margin:0 0 16px}
+#btnslot .share-note{margin:6px 0 12px}
+.viewtabs{display:flex;gap:6px;margin-bottom:10px}
+.viewtabs button{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:7px 13px;border-radius:999px;border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;color:var(--text-secondary);
+}
+.viewtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn{
   font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
   padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
@@ -92,7 +101,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   position:absolute;top:7px;left:9px;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text-secondary);
 }
 .pcard.first .rk{color:var(--accent)}
-.chips{position:absolute;top:6px;right:7px;display:flex;flex-direction:column;gap:3px;align-items:flex-end}
+.chips{display:flex;flex-direction:row;justify-content:center;gap:4px;margin:4px 0 2px;flex-wrap:wrap}
 .pcard .delta{
   font-family:var(--mono);font-size:10px;font-weight:700;
   padding:2px 5px;border-radius:10px;background:var(--surface-hover);color:var(--text-secondary);
@@ -234,7 +243,12 @@ footer a:hover{color:var(--accent)}
     </div>
 
     <div>
+      <div class="viewtabs" id="viewtabs" hidden>
+        <button data-v="mine" class="on">Your Top 25</button>
+        <button data-v="crowd">Fan consensus</button>
+      </div>
       <div class="grid" id="grid"></div>
+      <div id="btnslot"></div>
       <div class="result-cards">
         <div class="card rc">
           <h3>Your profile</h3>
@@ -261,7 +275,7 @@ footer a:hover{color:var(--accent)}
         </div>
       </div>
       <footer>
-        Anything wrong with the game? Email us at <a href="mailto:hoopshype@hoopshype.com">hoopshype@hoopshype.com</a><br>
+        Anything wrong with the tool? Email us at <a href="mailto:hoopshype@hoopshype.com">hoopshype@hoopshype.com</a><br>
         For business inquiries, contact us at <a href="mailto:ads@hoopshype.com">ads@hoopshype.com</a>
       </footer>
     </div>
@@ -453,10 +467,12 @@ function fmtScore(s){ return Math.round(s / 100).toLocaleString("en-US"); }
 
 var userTouched = /[?&]w=/.test(location.search);
 var submitTimer = null;
+var viewMode = "mine";   /* "mine" | "crowd" (fan consensus) */
 function recompute(){
   if(!DATA) return;
   var rows = ranked();
-  renderGrid(rows.slice(0,25));
+  if(viewMode === "crowd" && crowd) renderCrowdGrid(rows);
+  else renderGrid(rows.slice(0,25));
   renderProfile();
   renderConsensus(rows);
   if(userTouched){
@@ -495,11 +511,59 @@ function renderGrid(top){
       : '<div class="no-img">' + initials(p.name) + "</div>";
     /* no score line on the cards - the ranking itself is the result */
     return '<div class="card pcard' + (r.rank === 1 ? " first" : "") + '" data-hh="' + p.hh80Rank + '">' +
-      '<span class="rk">' + r.rank + "</span>" + chip + img +
+      '<span class="rk">' + r.rank + "</span>" + img + chip +
       '<div class="nm">' + p.name + "</div></div>";
   }).join("");
   document.getElementById("grid").innerHTML = html;
 }
+
+/* ---- fan consensus grid: the crowd's Top 25, with HH and your deltas ---- */
+function renderCrowdGrid(rows){
+  var byHH = {};
+  DATA.players.forEach(function(p){ byHH[p.hh80Rank] = p; });
+  var mine = {};
+  rows.forEach(function(r){ mine[r.p.hh80Rank] = r.rank; });
+  var order = Object.keys(crowd.rank).sort(function(a,b){ return crowd.rank[a] - crowd.rank[b]; }).slice(0,25);
+  var html = order.map(function(hh,i){
+    var p = byHH[hh];
+    if(!p) return "";
+    var pos = i + 1;
+    var chip = '<span class="chips">' + deltaChip(p.hh80Rank, pos, "HH") +
+      (mine[hh] ? deltaChip(mine[hh], pos, "You") : "") + "</span>";
+    var url = headshotUrl(p);
+    var img = url
+      ? '<div class="headshot-wrap"><img loading="lazy" src="' + url + '" alt="' + p.name + '" ' +
+        'onerror="imgFallback(this)" data-step="0"></div>'
+      : '<div class="no-img">' + initials(p.name) + "</div>";
+    return '<div class="card pcard' + (pos === 1 ? " first" : "") + '" data-hh="' + p.hh80Rank + '">' +
+      '<span class="rk">' + pos + "</span>" + img + chip +
+      '<div class="nm">' + p.name + "</div></div>";
+  }).join("");
+  document.getElementById("grid").innerHTML = html;
+}
+document.getElementById("viewtabs").addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest("button") : null;
+  if(!b || b.dataset.v === viewMode) return;
+  viewMode = b.dataset.v;
+  this.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x === b); });
+  recompute();
+});
+
+/* on phones the share buttons live under the ranking, not above it */
+(function(){
+  var mq = window.matchMedia("(max-width: 900px)");
+  var btns = document.querySelector(".panel-btns");
+  var note = document.getElementById("sharenote");
+  var slot = document.getElementById("btnslot");
+  var home = btns.parentNode;
+  function place(){
+    if(mq.matches){ slot.appendChild(btns); slot.appendChild(note); }
+    else { home.appendChild(btns); home.appendChild(note); }
+  }
+  if(mq.addEventListener) mq.addEventListener("change", place);
+  else mq.addListener(place);
+  place();
+})();
 /* webp 160 first, full-size face2 png on error, initials as last resort */
 function imgFallback(img){
   if(img.dataset.step === "0"){
@@ -610,6 +674,7 @@ function renderConsensus(rows){
              '</span><span class="v">you: ' + (userRow ? userRow.rank : "-") + "</span></div>";
     }).join("");
     document.getElementById("crowd80link").hidden = false;
+    document.getElementById("viewtabs").hidden = false;
   }
   /* biggest mover within the user's Top 25 - vs the crowd when we have it,
      vs the official HoopsHype 80 otherwise */
@@ -855,12 +920,13 @@ function renderShareCard(){
     c.fillText("MY GOAT RANKING", CARD_W/2, 152);
     /* adjective pill */
     c.font = "700 30px Poppins, sans-serif";
-    var tw = c.measureText(adj).width;
+    var pillTxt = "Voter Profile: " + adj;
+    var tw = c.measureText(pillTxt).width;
     var pw = tw + 76, px = (CARD_W - pw)/2, py = 182, ph = 56;
     var pg = c.createLinearGradient(px, 0, px+pw, 0);
     pg.addColorStop(0, BRAND_A); pg.addColorStop(1, BRAND_B);
     cardRoundRect(c, px, py, pw, ph, 28); c.fillStyle = pg; c.fill();
-    c.fillStyle = "#ffffff"; c.fillText(adj, CARD_W/2, py + 39);
+    c.fillStyle = "#ffffff"; c.fillText(pillTxt, CARD_W/2, py + 39);
 
     /* what they rate highly / lowly: top/bottom 4, dropping to 3 if the
        labels would not fit on one line even at the minimum font size */
