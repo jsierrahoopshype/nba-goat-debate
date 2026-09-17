@@ -274,6 +274,7 @@ footer a:hover{color:var(--accent)}
           </div>
         </div>
       </div>
+      <div id="crowd80slot" style="text-align:center"></div>
       <footer>
         Anything wrong with the tool? Email us at <a href="mailto:hoopshype@hoopshype.com">hoopshype@hoopshype.com</a><br>
         For business inquiries, contact us at <a href="mailto:ads@hoopshype.com">ads@hoopshype.com</a>
@@ -557,16 +558,21 @@ document.getElementById("viewtabs").addEventListener("click", function(e){
   recompute();
 });
 
-/* on phones the share buttons live under the ranking, not above it */
+/* on phones the share buttons live under the ranking, and the crowd's
+   full-80 link moves to the bottom of the page */
 (function(){
   var mq = window.matchMedia("(max-width: 900px)");
   var btns = document.querySelector(".panel-btns");
   var note = document.getElementById("sharenote");
   var slot = document.getElementById("btnslot");
   var home = btns.parentNode;
+  var c80 = document.getElementById("crowd80link");
+  var c80slot = document.getElementById("crowd80slot");
+  var c80home = c80.parentNode;
+  var c80next = c80.nextSibling;
   function place(){
-    if(mq.matches){ slot.appendChild(btns); slot.appendChild(note); }
-    else { home.appendChild(btns); home.appendChild(note); }
+    if(mq.matches){ slot.appendChild(btns); slot.appendChild(note); c80slot.appendChild(c80); }
+    else { home.appendChild(btns); home.appendChild(note); c80home.insertBefore(c80, c80next); }
   }
   if(mq.addEventListener) mq.addEventListener("change", place);
   else mq.addListener(place);
