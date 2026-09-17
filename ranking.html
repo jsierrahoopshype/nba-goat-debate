@@ -415,12 +415,13 @@ function buildSliders(){
       paintTrack(inp);
     });
     inp.addEventListener("change", function(){
-      userTouched = true;
+      touchedKeys[inp.dataset.key] = true;
       guardAllZero(inp);
       recompute();
     });
   });
   document.getElementById("resetbtn").addEventListener("click", function(){
+    touchedKeys = {};
     CATS.forEach(function(c){ setWeight(c.key, DEFAULTS[c.key]); });
     history.replaceState(null, "", location.pathname);
     document.title = "GOAT Machine: build your own NBA Top 25 | HoopsMatic";
@@ -465,7 +466,14 @@ function ranked(){
 }
 function fmtScore(s){ return Math.round(s / 100).toLocaleString("en-US"); }
 
-var userTouched = /[?&]w=/.test(location.search);
+/* A ballot only counts once the visitor forms a full ranking of their own:
+   every one of the 17 sliders touched, or an explicit share/copy/card action.
+   Arriving on someone else's ?w= link never counts as a vote. */
+var touchedKeys = {};
+var sharedAction = false;
+function ballotQualifies(){
+  return sharedAction || Object.keys(touchedKeys).length >= CATS.length;
+}
 var submitTimer = null;
 var viewMode = "mine";   /* "mine" | "crowd" (fan consensus) */
 function recompute(){
@@ -475,7 +483,7 @@ function recompute(){
   else renderGrid(rows.slice(0,25));
   renderProfile();
   renderConsensus(rows);
-  if(userTouched){
+  if(ballotQualifies()){
     clearTimeout(submitTimer);
     submitTimer = setTimeout(function(){ submitToCrowd(ranked()); }, 4000);
   }
@@ -803,6 +811,8 @@ document.getElementById("crowd80link").addEventListener("click", openCrowd80);
 
 /* ---- share ---- */
 function shareLink(){
+  sharedAction = true;
+  submitToCrowd(ranked());   /* sharing = your ranking is final */
   var w = CATS.map(function(c){ return weights[c.key]; }).join("-");
   var url = location.origin + location.pathname + "?w=" + w;
   history.replaceState(null, "", "?w=" + w);
@@ -832,6 +842,8 @@ var BRAND_A = "#8B7CFF", BRAND_B = "#FF5CA8";
 var FACE_OVERSCAN = 1.2;
 
 function openShareCard(){
+  sharedAction = true;
+  submitToCrowd(ranked());   /* sharing = your ranking is final */
   var modal = document.createElement("div");
   modal.id = "cardmodal";
   modal.innerHTML =
