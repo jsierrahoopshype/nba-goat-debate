@@ -405,10 +405,13 @@ function submitToCrowd(rows){
     var today = new Date().toISOString().slice(0,10);
     if(localStorage.getItem("goatMachineSubmitted") === today) return;
     var order = rows.map(function(r){ return r.p.hh80Rank; });
+    /* the weights travel with the ballot: they are what makes segment
+       analysis possible ("how did the MJ-over-LeBron voters weigh things?") */
+    var w = CATS.map(function(c){ return weights[c.key]; });
     fetch(CONSENSUS_API + "/submit", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({order: order})
+      body: JSON.stringify({order: order, w: w})
     }).then(function(r){
       if(r.ok) localStorage.setItem("goatMachineSubmitted", today);
     }).catch(function(){});
