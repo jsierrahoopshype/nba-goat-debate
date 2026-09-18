@@ -74,6 +74,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .panel-btns{display:flex;gap:8px;flex-wrap:wrap}
 .panel-btns.top{margin:0 0 12px}
 .panel-btns.bottom{margin:2px 0 18px}
+/* desktop keeps a single row, right under the ranking; phones get both */
+@media(min-width:901px){.panel-btns.top{display:none}}
 .viewtabs{display:flex;gap:6px;margin-bottom:10px}
 .viewtabs button{
   font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
