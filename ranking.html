@@ -267,14 +267,12 @@ footer a:hover{color:var(--accent)}
           <div class="wlbl" id="crowdlbl" hidden>What the crowd says</div>
           <div id="crowdlist"></div>
           <div id="crowddetail" hidden></div>
-          <a href="#" id="crowd80link" class="crowd80" hidden>See the crowd's full 80 &rarr;</a>
           <div class="movers">
             <div class="mover up"><span class="tag" id="risertag">Your biggest riser</span><span id="riser"></span></div>
             <div class="mover down"><span class="tag" id="fallertag">Your biggest faller</span><span id="faller"></span></div>
           </div>
         </div>
       </div>
-      <div id="crowd80slot" style="text-align:center"></div>
       <footer>
         Anything wrong with the tool? Email us at <a href="mailto:hoopshype@hoopshype.com">hoopshype@hoopshype.com</a><br>
         For business inquiries, contact us at <a href="mailto:ads@hoopshype.com">ads@hoopshype.com</a>
@@ -532,7 +530,7 @@ function renderCrowdGrid(rows){
   DATA.players.forEach(function(p){ byHH[p.hh80Rank] = p; });
   var mine = {};
   rows.forEach(function(r){ mine[r.p.hh80Rank] = r.rank; });
-  var order = Object.keys(crowd.rank).sort(function(a,b){ return crowd.rank[a] - crowd.rank[b]; }).slice(0,25);
+  var order = Object.keys(crowd.rank).sort(function(a,b){ return crowd.rank[a] - crowd.rank[b]; });  /* the full 80 */
   var html = order.map(function(hh,i){
     var p = byHH[hh];
     if(!p) return "";
@@ -558,21 +556,16 @@ document.getElementById("viewtabs").addEventListener("click", function(e){
   recompute();
 });
 
-/* on phones the share buttons live under the ranking, and the crowd's
-   full-80 link moves to the bottom of the page */
+/* on phones the share buttons live under the ranking, not above it */
 (function(){
   var mq = window.matchMedia("(max-width: 900px)");
   var btns = document.querySelector(".panel-btns");
   var note = document.getElementById("sharenote");
   var slot = document.getElementById("btnslot");
   var home = btns.parentNode;
-  var c80 = document.getElementById("crowd80link");
-  var c80slot = document.getElementById("crowd80slot");
-  var c80home = c80.parentNode;
-  var c80next = c80.nextSibling;
   function place(){
-    if(mq.matches){ slot.appendChild(btns); slot.appendChild(note); c80slot.appendChild(c80); }
-    else { home.appendChild(btns); home.appendChild(note); c80home.insertBefore(c80, c80next); }
+    if(mq.matches){ slot.appendChild(btns); slot.appendChild(note); }
+    else { home.appendChild(btns); home.appendChild(note); }
   }
   if(mq.addEventListener) mq.addEventListener("change", place);
   else mq.addListener(place);
@@ -681,13 +674,12 @@ function renderConsensus(rows){
     var order = Object.keys(crowd.rank).sort(function(a,b){ return crowd.rank[a] - crowd.rank[b]; });
     var lbl = document.getElementById("crowdlbl");
     lbl.hidden = false;
-    lbl.textContent = "What the crowd's lists say (" + crowd.count.toLocaleString("en-US") + " lists)";
+    lbl.textContent = "What the crowd says";
     document.getElementById("crowdlist").innerHTML = order.slice(0,5).map(function(hh,i){
       var userRow = rows.filter(function(r){ return r.p.hh80Rank === +hh; })[0];
       return '<div class="lead-row"><span>' + pnameSpan(byName[hh]) +
              '</span><span class="v">you: ' + (userRow ? userRow.rank : "-") + "</span></div>";
     }).join("");
-    document.getElementById("crowd80link").hidden = false;
     document.getElementById("viewtabs").hidden = false;
   }
   /* biggest mover within the user's Top 25 - vs the crowd when we have it,
@@ -773,7 +765,7 @@ function openPlayerModal(hh){
   }
   if(p.pickSharePct > 0) row("NBA players' GOAT pick share", p.pickSharePct + "%");
   var foot = (crowd && crowd.rank[hh])
-    ? "Crowd numbers come from " + crowd.count.toLocaleString("en-US") + " reader-submitted lists."
+    ? "Crowd numbers come from reader-submitted lists."
     : "Not enough reader lists submitted yet for crowd numbers - move the sliders and yours counts too.";
   var modal = document.createElement("div");
   modal.id = "playermodal";
@@ -785,35 +777,6 @@ function openPlayerModal(hh){
   modal.querySelector(".closex").addEventListener("click", function(){ modal.remove(); });
 }
 
-/* ---- the crowd's full 80 modal ---- */
-function openCrowd80(e){
-  if(e) e.preventDefault();
-  if(!crowd || !DATA) return;
-  var byName = {};
-  DATA.players.forEach(function(p){ byName[p.hh80Rank] = p; });
-  var order = Object.keys(crowd.rank).sort(function(a,b){ return crowd.rank[a] - crowd.rank[b]; });
-  var rowsHtml = '<div class="c80-row c80-head"><span class="r">#</span><span>Player</span>' +
-    '<span class="m">avg spot</span><span class="m">most often</span></div>';
-  rowsHtml += order.map(function(hh){
-    var p = byName[hh];
-    if(!p) return "";
-    var s = crowd.stats && crowd.stats[hh];
-    var avg = s ? s.avg : "&mdash;";
-    var mode = s && s.mode ? "No. " + s.mode + " (" + s.modePct + "%)" : "&mdash;";
-    return '<div class="c80-row"><span class="r">' + crowd.rank[hh] + "</span><span>" + p.name +
-      '</span><span class="m">' + avg + '</span><span class="m">' + mode + "</span></div>";
-  }).join("");
-  var modal = document.createElement("div");
-  modal.id = "crowd80modal";
-  modal.innerHTML = '<div class="box"><div class="box-head">' +
-    '<h3 class="section-title">The crowd\'s full 80 &middot; ' + crowd.count.toLocaleString("en-US") + " lists</h3>" +
-    '<button class="closex" aria-label="Close">&times;</button></div>' +
-    '<div class="rows">' + rowsHtml + "</div></div>";
-  document.body.appendChild(modal);
-  modal.addEventListener("click", function(ev){ if(ev.target === modal) modal.remove(); });
-  modal.querySelector(".closex").addEventListener("click", function(){ modal.remove(); });
-}
-document.getElementById("crowd80link").addEventListener("click", openCrowd80);
 
 /* ---- share ---- */
 function shareLink(){
@@ -856,8 +819,9 @@ function openShareCard(){
     '<div class="stage"><canvas id="sharecanvas" width="' + CARD_W + '" height="' + CARD_H + '"></canvas></div>' +
     '<div class="cstatus" id="cardstatus">Building your card…</div>' +
     '<div class="cardbtns">' +
+      '<button class="cbtn dl" id="cardshare">Share image + link</button>' +
       '<button class="cbtn cp" id="cardcopy">Copy image</button>' +
-      '<button class="cbtn dl" id="carddl">Download PNG</button>' +
+      '<button class="cbtn cp" id="carddl">Download PNG</button>' +
       '<button class="cbtn cl" id="cardclose">Close</button>' +
     "</div>";
   document.body.appendChild(modal);
@@ -1016,8 +980,30 @@ function renderShareCard(){
 }
 
 function wireCardButtons(canvas){
-  var dl = document.getElementById("carddl"), cp = document.getElementById("cardcopy");
+  var dl = document.getElementById("carddl"), cp = document.getElementById("cardcopy"),
+      sh = document.getElementById("cardshare");
   if(!dl) return;
+  /* one tap shares the picture AND the link: native share sheet where the
+     browser has one (phones), download + link-copy everywhere else */
+  sh.onclick = function(){
+    var url = location.origin + location.pathname + "?w=" +
+      CATS.map(function(c){ return weights[c.key]; }).join("-");
+    canvas.toBlob(function(blob){
+      var file = new File([blob], "my-goat-top25.png", {type: "image/png"});
+      if(navigator.canShare && navigator.canShare({files: [file]})){
+        navigator.share({files: [file], title: "My GOAT Top 25",
+                         text: "My GOAT Top 25 - build yours: " + url}).catch(function(){});
+      } else {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "my-goat-top25.png";
+        a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+        if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url);
+        cardStatus("Image downloaded and link copied - post them together.");
+      }
+    }, "image/png");
+  };
   dl.onclick = function(){
     canvas.toBlob(function(blob){
       var a = document.createElement("a");
