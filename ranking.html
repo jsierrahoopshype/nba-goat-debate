@@ -200,23 +200,49 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
 /* ---- share card modal (Trade Card / comparison card style) ---- */
 #cardmodal{
-  position:fixed;inset:0;background:rgba(8,7,15,.78);z-index:50;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px;
+  position:fixed;inset:0;background:rgba(10,10,18,.82);z-index:50;backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;
+}
+#cardmodal .share-box{
+  position:relative;width:100%;max-width:440px;margin:auto;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
 }
 #cardmodal .stage{
-  width:min(92vw, 440px);aspect-ratio:1080/1350;border-radius:14px;overflow:hidden;
-  box-shadow:0 20px 60px rgba(0,0,0,.55);background:#0d0a22;
+  width:100%;aspect-ratio:1080/1350;max-height:58vh;border-radius:14px;overflow:hidden;
+  box-shadow:0 18px 50px rgba(0,0,0,.6);background:#0d0a22;
 }
 #cardmodal canvas{width:100%;height:100%;display:block}
-#cardmodal .cardbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#cardmodal .share-x{
+  position:absolute;top:-14px;right:-8px;width:40px;height:40px;border-radius:50%;border:none;
+  background:#fff;color:#1d1d1f;font-size:24px;line-height:1;cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,.5);
+}
+#cardmodal .share-link{display:flex;width:100%;gap:8px}
+#cardmodal .share-url{
+  flex:1;min-width:0;background:#1c1c26;border:1px solid #3a3a4a;border-radius:10px;color:#dcdce8;
+  font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 12px;
+}
+#cardmodal .share-copybtn{
+  flex:0 0 auto;background:linear-gradient(135deg,#8B7CFF,#FF5CA8);color:#fff;border:none;
+  border-radius:10px;padding:0 16px;font-family:'Poppins',Arial,sans-serif;font-weight:700;font-size:14px;cursor:pointer;
+}
+#cardmodal .share-social{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+#cardmodal .soc{
+  display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #3a3a4a;
+  background:#1c1c26;color:#fff;border-radius:12px;padding:11px 8px;cursor:pointer;
+  font-family:'Poppins',Arial,sans-serif;font-weight:600;font-size:13px;
+}
+#cardmodal .soc svg{width:18px;height:18px}
+#cardmodal .soc:hover{border-color:#8B7CFF}
+#cardmodal .cardbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 #cardmodal .cbtn{
-  font-family:'Poppins',Arial,sans-serif;font-weight:600;font-size:14px;padding:11px 24px;
+  font-family:'Poppins',Arial,sans-serif;font-weight:600;font-size:14px;padding:11px 18px;
   border-radius:999px;border:none;cursor:pointer;color:#fff;letter-spacing:.02em;
 }
 #cardmodal .cbtn.dl{background:linear-gradient(135deg,#8B7CFF,#FF5CA8)}
 #cardmodal .cbtn.cp{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.25)}
 #cardmodal .cbtn.cl{background:transparent;border:1.5px solid rgba(255,255,255,.25);color:#a29dcf}
-#cardmodal .cstatus{font-family:'Poppins',Arial,sans-serif;font-size:12px;color:#a29dcf;min-height:16px;text-align:center}
+#cardmodal .cstatus{font-family:'JetBrains Mono',monospace;font-size:12px;color:#9ee6b8;min-height:16px;text-align:center}
 footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--hair);font-size:12px;color:var(--text-secondary);line-height:1.6}
 footer a{text-decoration:underline;text-underline-offset:2px}
 footer a:hover{color:var(--accent)}
@@ -816,21 +842,81 @@ function openShareCard(){
   var modal = document.createElement("div");
   modal.id = "cardmodal";
   modal.innerHTML =
-    '<div class="stage"><canvas id="sharecanvas" width="' + CARD_W + '" height="' + CARD_H + '"></canvas></div>' +
-    '<div class="cstatus" id="cardstatus">Building your card…</div>' +
-    '<div class="cardbtns">' +
-      '<button class="cbtn dl" id="cardshare">Share image + link</button>' +
-      '<button class="cbtn cp" id="cardcopy">Copy image</button>' +
-      '<button class="cbtn cp" id="carddl">Download PNG</button>' +
-      '<button class="cbtn cl" id="cardclose">Close</button>' +
+    '<div class="share-box">' +
+      '<button class="share-x" aria-label="Close">&times;</button>' +
+      '<div class="stage"><canvas id="sharecanvas" width="' + CARD_W + '" height="' + CARD_H + '"></canvas></div>' +
+      '<div class="share-link"><input class="share-url" readonly value="' + shareUrl() + '">' +
+        '<button class="share-copybtn" id="cardcopylink">Copy</button></div>' +
+      '<div class="share-social">' +
+        SOC.map(function(s){
+          return '<button class="soc" data-soc="' + s[0] + '" aria-label="Share on ' + s[1] + '">' +
+                 SOC_ICON[s[0]] + "<span>" + s[1] + "</span></button>";
+        }).join("") +
+      "</div>" +
+      '<div class="cardbtns">' +
+        '<button class="cbtn dl" id="carddl">Download</button>' +
+        '<button class="cbtn cp" id="cardcopy">Copy image</button>' +
+        '<button class="cbtn cp" id="cardshare">More&hellip;</button>' +
+        '<button class="cbtn cl" id="cardclose">Close</button>' +
+      "</div>" +
+      '<div class="cstatus" id="cardstatus">Building your card&hellip;</div>' +
     "</div>";
   document.body.appendChild(modal);
-  modal.addEventListener("click", function(e){ if(e.target === modal) modal.remove(); });
-  document.getElementById("cardclose").addEventListener("click", function(){ modal.remove(); });
+  function closeCard(){ modal.remove(); document.removeEventListener("keydown", onCardKey); }
+  function onCardKey(e){ if(e.key === "Escape") closeCard(); }
+  document.addEventListener("keydown", onCardKey);
+  modal.addEventListener("click", function(e){ if(e.target === modal) closeCard(); });
+  modal.querySelector(".share-x").addEventListener("click", closeCard);
+  document.getElementById("cardclose").addEventListener("click", closeCard);
+  var urlField = modal.querySelector(".share-url");
+  urlField.addEventListener("click", function(){ urlField.select(); });
+  modal.querySelectorAll("[data-soc]").forEach(function(b){
+    b.addEventListener("click", function(){
+      window.open(socialURL(b.dataset.soc), "_blank", "noopener,noreferrer");
+    });
+  });
+  document.getElementById("cardcopylink").addEventListener("click", function(){
+    var txt = SHARE_TEXT + "\n" + shareUrl();
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(
+        function(){ cardStatus("Text + link copied."); },
+        function(){ cardStatus("Copy blocked here."); });
+    } else cardStatus("Copy blocked here.");
+  });
   renderShareCard();
 }
 
 function cardStatus(msg){ var el = document.getElementById("cardstatus"); if(el) el.textContent = msg; }
+
+/* ---- share sheet: same six platforms and layout as the other HoopsMatic games ---- */
+var SHARE_TEXT = "This is my GOAT Top 25. Can you do better?";
+function shareUrl(){
+  return location.origin + location.pathname + "?w=" +
+         CATS.map(function(c){ return weights[c.key]; }).join("-");
+}
+function socialURL(kind){
+  var url = shareUrl(), text = SHARE_TEXT;
+  var u = encodeURIComponent(url), t = encodeURIComponent(text),
+      tu = encodeURIComponent(text + " " + url);
+  switch(kind){
+    case "x": return "https://twitter.com/intent/tweet?text=" + t + "&url=" + u;
+    case "bsky": return "https://bsky.app/intent/compose?text=" + tu;
+    case "fb": return "https://www.facebook.com/sharer/sharer.php?u=" + u + "&quote=" + t;
+    case "wa": return "https://wa.me/?text=" + tu;
+    case "reddit": return "https://www.reddit.com/submit?url=" + u + "&title=" + t;
+    case "telegram": return "https://t.me/share/url?url=" + u + "&text=" + t;
+  }
+  return url;
+}
+var SOC = [["x","X"],["bsky","Bluesky"],["fb","Facebook"],["wa","WhatsApp"],["reddit","Reddit"],["telegram","Telegram"]];
+var SOC_ICON = {
+  x: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.24 6.93zM17.61 20.64h2.04L6.49 3.24H4.3z"/></svg>',
+  bsky: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8C10.91 8.69 7.95 4.75 5.2 2.81 2.57.94 1.56 1.27.9 1.57.14 1.91 0 3.08 0 3.77c0 .69.38 5.65.62 6.48.82 2.74 3.71 3.66 6.38 3.36-3.91.58-7.39 2.01-2.83 7.08 5.01 5.19 6.87-1.11 7.82-4.31.95 3.2 2.05 9.27 7.73 4.31 4.27-4.31 1.17-6.5-2.74-7.08 2.67.3 5.57-.63 6.38-3.36C23.62 9.42 24 4.46 24 3.77c0-.69-.14-1.86-.9-2.2-.66-.3-1.66-.62-4.3 1.24C16.05 4.75 13.09 8.69 12 10.8z"/></svg>',
+  fb: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07c0 6.02 4.39 11.01 10.13 11.93v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8v8.44C19.61 23.08 24 18.09 24 12.07z"/></svg>',
+  wa: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15s-.77.97-.94 1.16c-.17.2-.35.22-.64.08-.3-.15-1.26-.47-2.39-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.14-.18.19-.3.29-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.89 6.99c0 5.45-4.43 9.88-9.88 9.88M20.46 3.49A11.81 11.81 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89a11.82 11.82 0 0 0-3.48-8.42"/></svg>',
+  reddit: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.74c.69 0 1.25.56 1.25 1.25a1.25 1.25 0 0 1-2.5.06l-2.6-.55-.8 3.75c1.83.07 3.48.63 4.68 1.49.31-.31.73-.49 1.21-.49.97 0 1.75.79 1.75 1.75 0 .72-.44 1.33-1.01 1.61.03.17.04.34.04.52 0 2.7-3.13 4.87-7 4.87-3.88 0-7-2.17-7-4.87 0-.18.01-.37.04-.53A1.75 1.75 0 0 1 4.03 12c0-.97.79-1.75 1.75-1.75.46 0 .9.2 1.21.49 1.21-.88 2.88-1.43 4.74-1.49l.89-4.18a.34.34 0 0 1 .14-.2.35.35 0 0 1 .24-.04l2.91.62a1.21 1.21 0 0 1 1.11-.7zM9.25 12c-.69 0-1.25.56-1.25 1.25 0 .69.56 1.25 1.25 1.25.69 0 1.25-.56 1.25-1.25 0-.69-.56-1.25-1.25-1.25zm5.5 0c-.69 0-1.25.56-1.25 1.25 0 .69.56 1.25 1.25 1.25.69 0 1.25-.56 1.25-1.25 0-.69-.56-1.25-1.25-1.25zm-5.47 3.99a.33.33 0 0 0-.23.09.33.33 0 0 0 0 .47c.84.84 2.48.91 2.96.91.48 0 2.11-.06 2.96-.91a.36.36 0 0 0 .03-.47.33.33 0 0 0-.46 0c-.55.53-1.69.73-2.51.73-.83 0-1.98-.2-2.51-.73a.33.33 0 0 0-.24-.09z"/></svg>',
+  telegram: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M11.94 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.06 0zm4.96 7.22c.1 0 .32.02.47.14a.51.51 0 0 1 .17.33c.02.09.04.31.02.47-.18 1.9-.96 6.5-1.36 8.63-.17.9-.5 1.2-.82 1.23-.7.06-1.23-.46-1.9-.9-1.06-.7-1.65-1.12-2.68-1.8-1.19-.78-.42-1.21.26-1.91.18-.18 3.25-2.98 3.31-3.23 0-.03.01-.15-.06-.21-.07-.06-.17-.04-.25-.02-.1.02-1.79 1.14-5.06 3.34-.48.33-.91.49-1.3.48-.43 0-1.25-.24-1.86-.44-.75-.24-1.35-.37-1.3-.79.03-.21.33-.43.89-.66 3.5-1.52 5.83-2.53 7-3.01 3.33-1.39 4.02-1.63 4.48-1.63z"/></svg>'
+};
 
 function loadCardImage(url){
   return new Promise(function(resolve){
@@ -983,27 +1069,6 @@ function wireCardButtons(canvas){
   var dl = document.getElementById("carddl"), cp = document.getElementById("cardcopy"),
       sh = document.getElementById("cardshare");
   if(!dl) return;
-  /* one tap shares the picture AND the link: native share sheet where the
-     browser has one (phones), download + link-copy everywhere else */
-  sh.onclick = function(){
-    var url = location.origin + location.pathname + "?w=" +
-      CATS.map(function(c){ return weights[c.key]; }).join("-");
-    canvas.toBlob(function(blob){
-      var file = new File([blob], "my-goat-top25.png", {type: "image/png"});
-      if(navigator.canShare && navigator.canShare({files: [file]})){
-        navigator.share({files: [file], title: "My GOAT Top 25",
-                         text: "My GOAT Top 25 - build yours: " + url}).catch(function(){});
-      } else {
-        var a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "my-goat-top25.png";
-        a.click();
-        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
-        if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url);
-        cardStatus("Image downloaded and link copied - post them together.");
-      }
-    }, "image/png");
-  };
   dl.onclick = function(){
     canvas.toBlob(function(blob){
       var a = document.createElement("a");
@@ -1011,15 +1076,27 @@ function wireCardButtons(canvas){
       a.download = "my-goat-top25.png";
       a.click();
       setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+      cardStatus("Saved to your downloads.");
     }, "image/png");
   };
   cp.onclick = function(){
     canvas.toBlob(function(blob){
       if(navigator.clipboard && window.ClipboardItem){
         navigator.clipboard.write([new ClipboardItem({"image/png": blob})])
-          .then(function(){ cardStatus("Copied. Paste it anywhere."); },
-                function(){ cardStatus("Copy blocked by the browser - use Download."); });
-      } else cardStatus("Copy not supported here - use Download.");
+          .then(function(){ cardStatus("Image copied. Paste it anywhere."); },
+                function(){ cardStatus("Copy blocked here. Use Download."); });
+      } else cardStatus("Copy blocked here. Use Download.");
+    }, "image/png");
+  };
+  /* native share sheet: the picture and the link travel together */
+  sh.onclick = function(){
+    canvas.toBlob(function(blob){
+      var file = new File([blob], "my-goat-top25.png", {type: "image/png"});
+      if(navigator.canShare && navigator.canShare({files: [file]})){
+        navigator.share({files: [file], title: "My GOAT Top 25",
+                         text: SHARE_TEXT, url: shareUrl()})
+          .catch(function(e){ if(!(e && e.name === "AbortError")) cardStatus("Share unavailable - use the buttons above."); });
+      } else cardStatus("No share sheet here - use the buttons above.");
     }, "image/png");
   };
 }
