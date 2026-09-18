@@ -71,9 +71,9 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   margin-top:6px;opacity:0;transition:opacity .25s;
 }
 .zero-msg.show{opacity:1}
-.panel-btns{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
-#btnslot .panel-btns{margin:0 0 16px}
-#btnslot .share-note{margin:6px 0 12px}
+.panel-btns{display:flex;gap:8px;flex-wrap:wrap}
+.panel-btns.top{margin:0 0 12px}
+.panel-btns.bottom{margin:2px 0 18px}
 .viewtabs{display:flex;gap:6px;margin-bottom:10px}
 .viewtabs button{
   font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
@@ -260,12 +260,6 @@ footer a:hover{color:var(--accent)}
     <div class="card panel" id="panel">
       <div id="sliders"></div>
       <div class="zero-msg" id="zeromsg">you have to care about something</div>
-      <div class="panel-btns">
-        <button class="btn primary" id="sharebtn">Copy link to my list</button>
-        <button class="btn" id="cardbtn">Share card</button>
-        <button class="btn" id="resetbtn">Reset</button>
-      </div>
-      <div class="share-note" id="sharenote"></div>
     </div>
 
     <div>
@@ -273,8 +267,15 @@ footer a:hover{color:var(--accent)}
         <button data-v="mine" class="on">Your Top 25</button>
         <button data-v="crowd">Fan consensus</button>
       </div>
+      <div class="panel-btns top">
+        <button class="btn primary js-card" id="cardbtn">Share card</button>
+        <button class="btn js-reset" id="resetbtn">Reset</button>
+      </div>
       <div class="grid" id="grid"></div>
-      <div id="btnslot"></div>
+      <div class="panel-btns bottom">
+        <button class="btn primary js-card">Share card</button>
+        <button class="btn js-reset">Reset</button>
+      </div>
       <div class="result-cards">
         <div class="card rc">
           <h3>Your profile</h3>
@@ -445,15 +446,19 @@ function buildSliders(){
       recompute();
     });
   });
-  document.getElementById("resetbtn").addEventListener("click", function(){
-    touchedKeys = {};
-    CATS.forEach(function(c){ setWeight(c.key, DEFAULTS[c.key]); });
-    history.replaceState(null, "", location.pathname);
-    document.title = "GOAT Machine: build your own NBA Top 25 | HoopsMatic";
-    recompute();
+  /* the same two actions sit above and below the ranking */
+  document.querySelectorAll(".js-reset").forEach(function(b){
+    b.addEventListener("click", function(){
+      touchedKeys = {};
+      CATS.forEach(function(c){ setWeight(c.key, DEFAULTS[c.key]); });
+      history.replaceState(null, "", location.pathname);
+      document.title = "GOAT Machine: build your own NBA Top 25 | HoopsMatic";
+      recompute();
+    });
   });
-  document.getElementById("sharebtn").addEventListener("click", shareLink);
-  document.getElementById("cardbtn").addEventListener("click", openShareCard);
+  document.querySelectorAll(".js-card").forEach(function(b){
+    b.addEventListener("click", openShareCard);
+  });
 }
 function paintTrack(inp){ inp.style.setProperty("--pct", inp.value + "%"); }
 function setWeight(key, v){
@@ -582,21 +587,6 @@ document.getElementById("viewtabs").addEventListener("click", function(e){
   recompute();
 });
 
-/* on phones the share buttons live under the ranking, not above it */
-(function(){
-  var mq = window.matchMedia("(max-width: 900px)");
-  var btns = document.querySelector(".panel-btns");
-  var note = document.getElementById("sharenote");
-  var slot = document.getElementById("btnslot");
-  var home = btns.parentNode;
-  function place(){
-    if(mq.matches){ slot.appendChild(btns); slot.appendChild(note); }
-    else { home.appendChild(btns); home.appendChild(note); }
-  }
-  if(mq.addEventListener) mq.addEventListener("change", place);
-  else mq.addListener(place);
-  place();
-})();
 /* webp 160 first, full-size face2 png on error, initials as last resort */
 function imgFallback(img){
   if(img.dataset.step === "0"){
@@ -804,29 +794,6 @@ function openPlayerModal(hh){
 }
 
 
-/* ---- share ---- */
-function shareLink(){
-  sharedAction = true;
-  submitToCrowd(ranked());   /* sharing = your ranking is final */
-  var w = CATS.map(function(c){ return weights[c.key]; }).join("-");
-  var url = location.origin + location.pathname + "?w=" + w;
-  history.replaceState(null, "", "?w=" + w);
-  document.title = "My GOAT Top 25 | GOAT Machine";
-  var note = document.getElementById("sharenote");
-  function done(ok){
-    note.textContent = ok ? "Link copied. Same sliders, same list, guaranteed." : url;
-    clearTimeout(note._t);
-    note._t = setTimeout(function(){ note.textContent = ""; }, 3500);
-  }
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(function(){ done(true); }, function(){ done(false); });
-  } else {
-    var ta = document.createElement("textarea");
-    ta.value = url; document.body.appendChild(ta); ta.select();
-    try { document.execCommand("copy"); done(true); } catch(e){ done(false); }
-    ta.remove();
-  }
-}
 
 /* ================= share card =================
    1080x1350 canvas in the house social-card style (NBA Trade Machine /
@@ -839,6 +806,9 @@ var FACE_OVERSCAN = 1.2;
 function openShareCard(){
   sharedAction = true;
   submitToCrowd(ranked());   /* sharing = your ranking is final */
+  /* keep the address bar in step with the list being shared */
+  history.replaceState(null, "", "?w=" + CATS.map(function(c){ return weights[c.key]; }).join("-"));
+  document.title = "My GOAT Top 25 | GOAT Machine";
   var modal = document.createElement("div");
   modal.id = "cardmodal";
   modal.innerHTML =
