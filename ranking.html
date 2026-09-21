@@ -865,12 +865,22 @@ function cardStatus(msg){ var el = document.getElementById("cardstatus"); if(el)
 
 /* ---- share sheet: same six platforms and layout as the other HoopsMatic games ---- */
 var SHARE_TEXT = "This is my GOAT Top 25. Can you do better?";
+/* Per-platform handle so HoopsHype gets tagged and we can see who is sharing.
+   Only the networks where an @mention actually resolves; the rest stay clean. */
+var SHARE_HANDLE = {
+  x: "@hoopshype",
+  bsky: "@hoopshypeofficial.bsky.social"
+};
+function shareText(kind){
+  var h = SHARE_HANDLE[kind];
+  return h ? SHARE_TEXT + " " + h : SHARE_TEXT;
+}
 function shareUrl(){
   return location.origin + location.pathname + "?w=" +
          CATS.map(function(c){ return weights[c.key]; }).join("-");
 }
 function socialURL(kind){
-  var url = shareUrl(), text = SHARE_TEXT;
+  var url = shareUrl(), text = shareText(kind);
   var u = encodeURIComponent(url), t = encodeURIComponent(text),
       tu = encodeURIComponent(text + " " + url);
   switch(kind){
