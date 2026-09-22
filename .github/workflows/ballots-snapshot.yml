@@ -1,0 +1,51 @@
+# Daily snapshot of the GOAT Machine's anonymous reader ballots.
+#
+# The consensus Worker lives on workers.dev, which the Cowork sandbox cannot
+# reach. raw.githubusercontent.com it can. So this Action mirrors /ballots
+# into the repo once a day and the weekly segment check reads the mirror.
+#
+# The ballots carry no identifiers: an 80-number order and 17 slider values.
+
+name: Snapshot GOAT ballots
+
+on:
+  schedule:
+    - cron: '20 5 * * *'      # 05:20 UTC daily
+  workflow_dispatch:           # and on demand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch ballots
+        run: |
+          mkdir -p data
+          curl -sS --fail --max-time 60 \
+            "https://hoopsmatic-goat-consensus.thejorgesierra.workers.dev/ballots?limit=1000" \
+            -o data/ballots-snapshot.json
+          # refuse to commit anything that is not the shape we expect
+          python3 - <<'PY'
+          import json, sys
+          d = json.load(open('data/ballots-snapshot.json'))
+          assert isinstance(d.get('cats'), list) and len(d['cats']) == 17, 'bad cats'
+          assert isinstance(d.get('ballots'), list) and d['ballots'], 'no ballots'
+          withw = [b for b in d['ballots'] if isinstance(b.get('w'), list) and len(b['w']) == 17]
+          print(f"ballots: {len(d['ballots'])}  with weights: {len(withw)}")
+          PY
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ballots-snapshot.json
+          if git diff --cached --quiet; then
+            echo "no change"
+          else
+            git commit -m "Ballots snapshot $(date -u +%Y-%m-%d)"
+            git push
+          fi
