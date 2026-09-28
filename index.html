@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>The GOAT Debate: who NBA players say is the greatest | HoopsMatic</title>
 <meta name="description" content="Every on-record GOAT pick by an NBA player, counted and broken down by who is doing the picking.">
+<link rel="canonical" href="https://hoopsmatic.com/goat/">
+<meta property="og:url" content="https://hoopsmatic.com/goat/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -203,6 +205,16 @@ var recs=D.records.filter(function(r){return r.pick && r.person;})
 function col(p){return COLORS[p]||FIELD;}
 function esc(s){var d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
 function slug(s){return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+/* canonical + og:url always point at hoopsmatic.com, even on github.io */
+function setCanonical(s){
+  var url='https://hoopsmatic.com/goat/'+(s||'');
+  var l=document.querySelector('link[rel="canonical"]');
+  if(!l){l=document.createElement('link');l.rel='canonical';document.head.appendChild(l);}
+  l.href=url;
+  var o=document.querySelector('meta[property="og:url"]');
+  if(!o){o=document.createElement('meta');o.setAttribute('property','og:url');document.head.appendChild(o);}
+  o.setAttribute('content',url);
+}
 
 /* ---------- routing ----------
    On hoopsmatic.com the page lives at /goat, so candidates get real paths
@@ -284,6 +296,7 @@ function wireQuotes(root){
 /* ---------------- index page ---------------- */
 function renderIndex(){
   document.title='The GOAT Debate: who NBA players say is the greatest | HoopsMatic';
+  setCanonical('');
   var lead=order[0];
   var leadPct=lead?(counts[lead]/recs.length*100).toFixed(1):'0.0';
 
@@ -392,6 +405,7 @@ function renderCandidate(name){
   var mine=recs.filter(function(r){return r.pick===name;});
   var pct=recs.length?counts[name]/recs.length*100:0;
   document.title=name+': every NBA player who calls him the GOAT | HoopsMatic';
+  setCanonical(slug(name));
 
   var supporters=[];
   var seen={};
