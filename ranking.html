@@ -48,7 +48,8 @@ main{max-width:1140px;margin:0 auto;padding:26px 20px 40px}
 /* ---- sliders ---- */
 .machine{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
 @media(max-width:900px){.machine{grid-template-columns:1fr}}
-.panel{padding:16px;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow-y:auto}
+/* top: 10px below the HoopsMatic nav (sticky, 41px tall above 760px) */
+.panel{padding:16px;position:sticky;top:51px;max-height:calc(100vh - 61px);overflow-y:auto}
 @media(max-width:900px){.panel{position:static;max-height:none}}
 .grp{margin-bottom:14px}
 .grp + .grp{border-top:1px solid var(--hair);padding-top:12px}
@@ -251,7 +252,7 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--hair);font-si
 footer a{text-decoration:underline;text-underline-offset:2px}
 footer a:hover{color:var(--accent)}
 </style>
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3b121dbeae7b4043b4bdfc8920c008f2"}'></script><!-- End Cloudflare Web Analytics --></head>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3b121dbeae7b4043b4bdfc8920c008f2"}'></script><!-- End Cloudflare Web Analytics --><script src="https://hoopsmatic.com/hoopsmatic-nav.js" defer></script></head>
 <body>
 <main>
   <a class="back" id="backlink" href="./">&larr; The GOAT Debate</a>
