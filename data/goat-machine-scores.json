@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-17",
+ "generated": "2026-10-03",
  "categoryOrder": [
   "careerAverages",
   "accumulatedStats",
@@ -20,13 +20,13 @@
   "abaCredit"
  ],
  "headshotBase": "https://jsierrahoopshype.github.io/nba-headshots/players/headshots/",
- "totalStatedPicks": 116,
+ "totalStatedPicks": 115,
  "players": [
   {
    "name": "LeBron James",
    "hh80Rank": 1,
    "headshot": "2544-lebron-james",
-   "pickSharePct": 42.2,
+   "pickSharePct": 43.5,
    "scores": {
     "careerAverages": 67.0,
     "accumulatedStats": 100.0,
@@ -51,7 +51,7 @@
    "name": "Michael Jordan",
    "hh80Rank": 2,
    "headshot": "893-michael-jordan",
-   "pickSharePct": 43.1,
+   "pickSharePct": 41.7,
    "scores": {
     "careerAverages": 67.4,
     "accumulatedStats": 67.5,
