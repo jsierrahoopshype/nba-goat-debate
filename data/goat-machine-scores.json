@@ -20,13 +20,13 @@
   "abaCredit"
  ],
  "headshotBase": "https://jsierrahoopshype.github.io/nba-headshots/players/headshots/",
- "totalStatedPicks": 115,
+ "totalStatedPicks": 119,
  "players": [
   {
    "name": "LeBron James",
    "hh80Rank": 1,
    "headshot": "2544-lebron-james",
-   "pickSharePct": 43.5,
+   "pickSharePct": 42.0,
    "scores": {
     "careerAverages": 67.0,
     "accumulatedStats": 100.0,
@@ -51,7 +51,7 @@
    "name": "Michael Jordan",
    "hh80Rank": 2,
    "headshot": "893-michael-jordan",
-   "pickSharePct": 41.7,
+   "pickSharePct": 43.7,
    "scores": {
     "careerAverages": 67.4,
     "accumulatedStats": 67.5,
@@ -76,7 +76,7 @@
    "name": "Kareem Abdul-Jabbar",
    "hh80Rank": 3,
    "headshot": "76003-kareem-abdul-jabbar",
-   "pickSharePct": 2.6,
+   "pickSharePct": 2.5,
    "scores": {
     "careerAverages": 65.8,
     "accumulatedStats": 94.3,
@@ -101,7 +101,7 @@
    "name": "Magic Johnson",
    "hh80Rank": 4,
    "headshot": "77142-magic-johnson",
-   "pickSharePct": 0.9,
+   "pickSharePct": 0.8,
    "scores": {
     "careerAverages": 62.4,
     "accumulatedStats": 51.3,
@@ -126,7 +126,7 @@
    "name": "Bill Russell",
    "hh80Rank": 5,
    "headshot": "78049-bill-russell",
-   "pickSharePct": 0.9,
+   "pickSharePct": 0.8,
    "scores": {
     "careerAverages": 71.7,
     "accumulatedStats": 69.3,
@@ -201,7 +201,7 @@
    "name": "Kobe Bryant",
    "hh80Rank": 8,
    "headshot": "977-kobe-bryant",
-   "pickSharePct": 4.3,
+   "pickSharePct": 4.2,
    "scores": {
     "careerAverages": 54.7,
     "accumulatedStats": 69.7,
@@ -576,7 +576,7 @@
    "name": "Nikola Jokic",
    "hh80Rank": 23,
    "headshot": "203999-nikola-joki",
-   "pickSharePct": 0.9,
+   "pickSharePct": 0.8,
    "scores": {
     "careerAverages": 67.7,
     "accumulatedStats": 48.8,
@@ -676,7 +676,7 @@
    "name": "Isiah Thomas",
    "hh80Rank": 27,
    "headshot": "78318-isiah-thomas",
-   "pickSharePct": 0.9,
+   "pickSharePct": 0.8,
    "scores": {
     "careerAverages": 49.5,
     "accumulatedStats": 47.0,
